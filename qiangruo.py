@@ -241,7 +241,7 @@ def get_bazi_score(wuxing_score,bazi,tiangan_dizhi):
                 else:
                     print(f"藏干：{tiangan_dizhi[item][1]},得分{list(bazi_wuxing[1][i].values())[0][3]*0.10}")
                     wuxing_score[tiangan_dizhi[item][1]] += list(bazi_wuxing[1][i].values())[0][3]*0.10
-    return wuxing_score
+    return wuxing_score,dizhicanggan
 
 def get_hehua_score(wuxing_score,bazi):
     yueling = bazi[1][1]
@@ -282,7 +282,62 @@ def get_hehua_score(wuxing_score,bazi):
                     print("aldjsflajsdfljasdlkfj")
                     print(wxxqs[item][hehuayuansu[i]]*50*hehua[hehua_name[i]][-1]*hehua_num[i])
             break
-    return wuxing_score
+
+
+    # 记录所有的刑冲合害破
+    xchhp = []
+    for (category, comb, *element), count in counts.items():
+        comb_str = ''.join(comb) if isinstance(comb, tuple) else ''.join(comb)
+        if category in ["害","破"]:
+            xchhp.append(f"{comb_str}相{category}")
+        elif category in ["三刑","半三刑","自刑"]:
+            xchhp.append(f"{comb_str}相刑")
+        elif category in ["六冲"]:
+            xchhp.append(f"{comb_str}相冲")
+        elif category == "暗合":
+            xchhp.append(f"{comb_str}暗合")
+        elif category in ["六合"]:
+            xchhp.append(f"{comb_str}合化{element[0][-2]}局")
+        elif category in ["三合"]:
+            xchhp.append(f"{comb_str}三合{element[0][-2]}局")
+        elif category in ["半三合"]:
+            xchhp.append(f"{comb_str}半合{element[0][-2]}局")
+        elif category in ["半三会"]:
+            xchhp.append(f"{comb_str}半会{element[0][-2]}局")
+        elif category in ["拱合"]:
+            xchhp.append(f"{comb_str}拱合{element[0][-2]}局")
+    return wuxing_score,xchhp
+
+
+def get_qiangruo(bazi_sfzk,wuxing_scale):
+    shengfu = bazi_sfzk["生扶"].split("，")
+    kexie = bazi_sfzk["克泄"].split("，")
+    shengfu_scale = 0
+    kexie_scale = 0
+    for item in shengfu:
+        shengfu_scale += float(wuxing_scale[item].strip("%"))
+    for item in kexie:
+        kexie_scale += float(wuxing_scale[item].strip("%"))
+    if shengfu_scale >=0 and shengfu_scale < 12.5:
+        return "极弱"
+    elif shengfu_scale >= 12.5 and shengfu_scale < 25:
+        return "太弱"
+    elif shengfu_scale >= 25 and shengfu_scale < 37.5:
+        return "弱"
+    elif shengfu_scale >= 37.5 and shengfu_scale < 50:
+        return "偏弱"
+    elif shengfu_scale >= 50 and shengfu_scale < 56.25:
+        return "中和"
+    elif shengfu_scale >= 56.25 and shengfu_scale < 68.75:
+        return "偏强"
+    elif shengfu_scale >= 68.75 and shengfu_scale < 81.25:
+        return "强"
+    elif shengfu_scale >= 81.25 and shengfu_scale <= 93.75:
+        return "太强"
+    elif shengfu_scale >= 93.75 and shengfu_scale <= 100:
+        return "极强"
+
+
 
 
 def main():
@@ -298,11 +353,10 @@ def main():
         wuxing_score[yueling_wuxing] += yueling_score
         print(wuxing_score)
         # 计算八字五行力量
-        wuxing_score = get_bazi_score(wuxing_score,bazi,tiangan_dizhi)
+        wuxing_score,dizhicanggan = get_bazi_score(wuxing_score,bazi,tiangan_dizhi)
         print(wuxing_score)
         # 计算合化力量
-        wuxing_score = get_hehua_score(wuxing_score,bazi)
-
+        wuxing_score,xchhp = get_hehua_score(wuxing_score,bazi)
         print(wuxing_score)
         # 计算总和
         total = sum(wuxing_score.values())
@@ -314,12 +368,16 @@ def main():
         bazi_sfzk = compute_bazisfkx(bazi_wuxing)
         print(bazi_sfzk)
         print(wuxing_scale)
+        # 计算身强身弱
+        qiangruo = get_qiangruo(bazi_sfzk,wuxing_scale)
+        print(qiangruo)
+
 if __name__ == "__main__":
 
-    # bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
+    bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
     # bazi = [ ['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
     # bazi = [["庚","癸","庚","丙"],["午","未","辰","子"]]
-    bazi = [["癸","壬","甲","甲"],["酉","戌","子","子"]]
+    # bazi = [["癸","壬","甲","甲"],["酉","戌","子","子"]]
     # bazi = [["丁","丁","甲","癸"],["亥","未","子","酉"]]
     tiangan_dizhi = {
         "甲":["阳","木"],

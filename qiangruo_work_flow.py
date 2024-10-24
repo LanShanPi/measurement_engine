@@ -298,6 +298,34 @@ def get_hehua_score(wuxing_score,bazi):
     return wuxing_score,xchhp
 
 
+def get_qiangruo(bazi_sfzk,wuxing_scale):
+    shengfu = bazi_sfzk["生扶"].split("，")
+    kexie = bazi_sfzk["克泄"].split("，")
+    shengfu_scale = 0
+    kexie_scale = 0
+    for item in shengfu:
+        shengfu_scale += float(wuxing_scale[item].strip("%"))
+    for item in kexie:
+        kexie_scale += float(wuxing_scale[item].strip("%"))
+    if shengfu_scale >=0 and shengfu_scale < 12.5:
+        return "极弱"
+    elif shengfu_scale >= 12.5 and shengfu_scale < 25:
+        return "太弱"
+    elif shengfu_scale >= 25 and shengfu_scale < 37.5:
+        return "弱"
+    elif shengfu_scale >= 37.5 and shengfu_scale < 50:
+        return "偏弱"
+    elif shengfu_scale >= 50 and shengfu_scale < 56.25:
+        return "中和"
+    elif shengfu_scale >= 56.25 and shengfu_scale < 68.75:
+        return "偏强"
+    elif shengfu_scale >= 68.75 and shengfu_scale < 81.25:
+        return "强"
+    elif shengfu_scale >= 81.25 and shengfu_scale <= 93.75:
+        return "太强"
+    elif shengfu_scale >= 93.75 and shengfu_scale <= 100:
+        return "极强"
+
 def main(arg1):
         bazi = [arg1[0].split(","),arg1[1].split(",")]
         tiangan_dizhi = {
@@ -354,11 +382,14 @@ def main(arg1):
         wuxing_scale_list = []
         for item in wuxing_scale.keys():
             wuxing_scale_list.append(item+":"+wuxing_scale[item])
+
+        qiangruo = get_qiangruo(bazi_sfzk,wuxing_scale)
         return {
         "dizhicanggan":dizhicanggan,
         "bazi_sfzk": bazi_sfzk_list,
         "wuxing_scale":wuxing_scale_list,
-        "xchhp":xchhp
+        "xchhp":xchhp,
+        "qiangruo":qiangruo
     }
 
 main(['甲,丙,己,甲','戌,子,卯,戌'])
