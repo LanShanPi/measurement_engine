@@ -1,6 +1,5 @@
 from itertools import combinations
 from collections import defaultdict, Counter
-import numpy as np
 import math
 
 def count_earthly_branch_combinations_with_scores(bazi):
@@ -72,15 +71,37 @@ def normal_cdf(z):
     """计算标准正态分布的累积分布函数 (CDF)。"""
     return 0.5 * (1 + math.erf(z / math.sqrt(2)))
 
-def get_guiqi(group1_score, group2_score):
-    """
-    根据正面和负面关系的比值和差值来计算命格评级。
-    - group1_score: 负面关系总分（刑冲害破）
-    - group2_score: 正面关系总分（六合、三合、拱合）
-    """
-    score = group1_score+group2_score
-    pass
+def get_guiqi(group1_score,group2_score):
+    # 计算贵气程度，全冲全合的最大值为4.67
+    if group2_score == 0 or group1_score == 0 or group1_score == group2_score:
+        return "极至贵"
+    # 计算分值差
+    diff = group2_score - group1_score  # 正面减负面
+    # 正态分布参数（均值 = 0，标准差 = 1）
+    mean = 0
+    std_dev = 1  # 标准差
+    # 计算 Z 分数
+    z_score = (diff - mean) / std_dev
+    # 使用累积分布函数计算百分位
+    percentile = normal_cdf(z_score)
 
+    # 根据百分位判断评级
+    if percentile >= 0.999:
+        return "极至贵"
+    elif percentile >= 0.997:
+        return "至贵"
+    elif percentile >= 0.95:
+        return "大贵"
+    elif percentile >= 0.75:
+        return "上贵"
+    elif percentile >= 0.25:
+        return "中贵"
+    elif percentile >= 0.05:
+        return "稍贱"
+    elif percentile >= 0.003:
+        return "下贱"
+    else:
+        return "绝下贱"
 
 def main(bazi):
     # 计算八字中地支的所有关系及其得分
@@ -96,26 +117,29 @@ def main(bazi):
         
         # 根据类别分配得分到不同组
         if category in ["六冲", "三刑", "半三刑", "自刑", "害", "破"]:
-            group1_score += -score
+            group1_score += score
         elif category in ["六合", "半三合", "拱合"]:
             group2_score += score
-    # 保留两位小数，四舍五入
-    group1_score = round(group1_score,2)
-    group2_score = round(group2_score,2)
-    # 输出每组的得分加和
-    print(f"八字地支中【六冲，三刑，半三刑，自刑，害，破】加和的得分为：{group1_score}")
-    print(f"八字地支中【六合，半三合、拱合】加和的得分为：{group2_score}")
-    print(bazi)
+    
     # 计算贵气程度
     guiqi_dengji = get_guiqi(group1_score,group2_score)
-    print(guiqi_dengji)
+
+    return {
+        "he":round(group2_score,2),
+        "chongxinghaipo":round(group1_score, 2),
+        "guiqichengdu":guiqi_dengji
+    }
+
+    
+
+    
 
 if __name__ == "__main__":
     # 示例八字，包含天干和地支
-    # bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
+    bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
     # bazi = [ ['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
     # bazi = [["庚","癸","庚","丙"],["午","未","辰","子"]]
-    bazi = [["癸","壬","甲","甲"],["酉","戌","子","子"]]
+    # bazi = [["癸","壬","甲","甲"],["酉","戌","子","子"]]
     # bazi = [["丁","丁","甲","癸"],["亥","未","子","酉"]]
     # bazi = [ ['丙', '庚', '癸', '戊'],['午', '午', '午', '午']]
     main(bazi)
