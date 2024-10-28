@@ -45,10 +45,12 @@ from datetime import datetime
 from lunar_python import Lunar
 d = Lunar.fromDate(datetime.now())
 
-# 宜
-l = d.getDayYi()
-print(l)
+# # 宜
+# l = d.getDayYi()
+# print(l)
 
-# 忌
-l = d.getDayJi()
-print(l)
+# # 忌
+# l = d.getDayJi()
+# print(l)
+
+print('日冲：'+d.getDayChongDesc())

@@ -125,27 +125,36 @@ def tiaoxi(bazi,date=None):
         list2.clear()
 
     # 计算用户八字的五行力量
-    _,bazi_wuxing_scale = wuxingliliang(bazi)
+    _,bazi_wuxing_scale,bazi_wuxing_score = wuxingliliang(bazi)
 
     # 计算今天所有十二时辰的五行力量
-    sizhu_wuxing_scale = []
+    sizhu_wuxing_score = []
     for item in shiershichen:
-        _,wuxing_scale = wuxingliliang(item)
-        sizhu_wuxing_scale.append(wuxing_scale)
+        _,wuxing_scale,wuxing_score = wuxingliliang(item)
+        sizhu_wuxing_score.append(wuxing_score)
         # print(sizhu_wuxing_scale[-1])
 
     # 计算今天所有十二时辰五行力量与用户八字五行力量的和
+    hebazi_score = []
     hebazi_scale = []
-    for i in range(len(sizhu_wuxing_scale)):
+    for i in range(len(sizhu_wuxing_score)):
         temp = {}
-        for key in list(bazi_wuxing_scale.keys()):
-            temp[key] = round(float(sizhu_wuxing_scale[i][key][:-1])+float(bazi_wuxing_scale[key][:-1]),3)
-        hebazi_scale.append(copy.deepcopy(temp))
-        # print(hebazi_scale[-1])
+        for key in list(bazi_wuxing_score.keys()):
+            temp[key] = round(float(sizhu_wuxing_score[i][key])+float(bazi_wuxing_score[key]),3)
+        hebazi_score.append(copy.deepcopy(temp))
+        # print(hebazi_score[-1])
+        # 计算总和
+        total = sum(temp.values())
+        # 计算占比
+        percentage_data = {k: (v / total) * 100 for k, v in temp.items()}
+        hebazi_scale.append({k: str(round(v, 3))+"%" for k, v in percentage_data.items()})
         # 根据五行力量的强弱重新从大到小排序
+        hebazi_score[-1] = dict(sorted(hebazi_score[-1].items(), key=lambda item: item[1]))
         hebazi_scale[-1] = dict(sorted(hebazi_scale[-1].items(), key=lambda item: item[1]))
         # print(hebazi_scale[-1])
         # print("****************")
+        temp.clear()
+
 
 
     # 获取各个时辰的幸运的东西
@@ -153,12 +162,12 @@ def tiaoxi(bazi,date=None):
     keys = list(result.keys())
     for i in range(len(keys)):
         all[keys[i]] = {"合后五行力量":hebazi_scale[i],"各种幸运":get_xingyun(list(hebazi_scale[i].keys())[0])}
-
     # 获取当前时间的时辰
     current_shichen = get_chinese_hour(hour, minute)
+
     print(f"当前时间对应的时辰是：{current_shichen}")
     print(f"数据为：{all[current_shichen]}")
     return current_shichen,all[current_shichen],all
 
 
-tiaoxi([['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']],"2024-10-28T11:04:54")
+tiaoxi([['甲', '甲', '乙', '丙'], ['辰', '戌', '丑', '子']],"")

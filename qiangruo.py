@@ -331,7 +331,7 @@ def get_hehua_score(wuxing_score,bazi):
 
 
 def get_qiangruo(bazi):
-    bazi_sfzk,wuxing_scale = wuxingliliang(bazi)
+    bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
     shengfu = bazi_sfzk["生扶"].split("，")
     kexie = bazi_sfzk["克泄"].split("，")
     shengfu_scale = 0
@@ -383,7 +383,7 @@ def wuxingliliang(bazi):
         # 计算日元的生扶克泄
         bazi_wuxing = tiangan_dizhi[bazi[0][2]][1]
         bazi_sfzk = compute_bazisfkx(bazi_wuxing)
-        return bazi_sfzk,wuxing_scale
+        return bazi_sfzk,wuxing_scale,wuxing_score
 
 
 
@@ -394,10 +394,10 @@ def wuxingliliang(bazi):
 # bazi = [["丁","丁","甲","癸"],["亥","未","子","酉"]]
 # bazi = [['丙', '甲', '丙', '甲'],['寅', '午', '午', '午']]
 # bazi = [['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
-# bazi = [['甲', '甲', '乙', '丙'], ['辰', '戌', '丑', '子']]
+bazi = [['甲', '甲', '乙', '丙'], ['辰', '戌', '丑', '子']]
 
-# bazi_sfzk,wuxing_scale = wuxingliliang(bazi)
-# print(wuxing_scale)
+bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
+print(wuxing_score)
 # # 计算身强身弱
 # qiangruo = get_qiangruo(bazi_sfzk,wuxing_scale)
 # print(qiangruo)
