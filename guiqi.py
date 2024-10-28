@@ -99,7 +99,7 @@ def get_guiqi(group1_score, group2_score):
         return "辉煌"
 
 
-def main(bazi):
+def guiqi_level(bazi):
     # 计算八字中地支的所有关系及其得分
     counts = count_earthly_branch_combinations_with_scores(bazi)
     group1_score = 0  # 用于存储【六冲，三刑，半三刑，自刑，害，破】的总得分
@@ -125,14 +125,4 @@ def main(bazi):
     print(bazi)
     # 计算贵气程度
     guiqi_dengji = get_guiqi(group1_score,group2_score)
-    print(guiqi_dengji)
-
-if __name__ == "__main__":
-    # 示例八字，包含天干和地支
-    # bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
-    # bazi = [ ['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
-    # bazi = [["庚","癸","庚","丙"],["午","未","辰","子"]]
-    bazi = [["癸","壬","甲","甲"],["酉","戌","子","子"]]
-    # bazi = [["丁","丁","甲","癸"],["亥","未","子","酉"]]
-    # bazi = [ ['丙', '庚', '癸', '戊'],['午', '午', '午', '午']]
-    main(bazi)
+    return guiqi_dengji

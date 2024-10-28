@@ -330,7 +330,8 @@ def get_hehua_score(wuxing_score,bazi):
     return wuxing_score,xchhp
 
 
-def get_qiangruo(bazi_sfzk,wuxing_scale):
+def get_qiangruo(bazi):
+    bazi_sfzk,wuxing_scale = wuxingliliang(bazi)
     shengfu = bazi_sfzk["生扶"].split("，")
     kexie = bazi_sfzk["克泄"].split("，")
     shengfu_scale = 0

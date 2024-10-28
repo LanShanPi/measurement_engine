@@ -81,77 +81,84 @@ def get_xingyun(yuansu):
     }
     return xingyun[yuansu]
 
-# 获取当前日期和时间
-now = datetime.now()
-current_date = now.strftime("%Y-%m-%dT%H:%M:%S")
-# 获取当前时间的四柱
-url = "http://42.123.114.119:8599/get_four_pillars"
-params = {"date": current_date}
-try:
-    response = requests.get(url, params=params)
-except:
-    print("四柱数据请求失败！！！")
+def tiaoxi(bazi,date=None):
+    if date:
+        current_date = date
+        time_ = current_date.split("T")[1].split(":")
+        hour = int(time_[0])
+        minute = int(time_[1])
+    else:
+        # 获取当前日期和时间
+        now = datetime.now()
+        current_date = now.strftime("%Y-%m-%dT%H:%M:%S")
+        # 当前时间所处时辰，对应的数据
+        hour = int(now.strftime("%H"))
+        minute = int(now.strftime("%M"))
+    # 获取当前时间的四柱
+    url = "http://42.123.114.119:8599/get_four_pillars"
+    params = {"date": current_date}
+    try:
+        response = requests.get(url, params=params)
+    except:
+        print("四柱数据请求失败！！！")
 
 
-# 获取当前时间日柱的天干以便推理今天十二时辰的天干地支
-day_stem = response.json()['day_pillar'][0]
-result = get_hour_pillar(day_stem)
+    # 获取当前时间日柱的天干以便推理今天十二时辰的天干地支
+    day_stem = response.json()['day_pillar'][0]
+    result = get_hour_pillar(day_stem)
 
-# 计算今天所有十二时辰的八字
-shiershichen = []
-for item in list(result.values()):
-    list1 = []
-    list2 = []
-    list1.append(response.json()['year_pillar'][0])
-    list2.append(response.json()['year_pillar'][1])
-    list1.append(response.json()['month_pillar'][0])
-    list2.append(response.json()['month_pillar'][1])
-    list1.append(response.json()['day_pillar'][0])
-    list2.append(response.json()['day_pillar'][1])
-    list1.append(item[0])
-    list2.append(item[1])
-    shiershichen.append([list1[::],list2[::]])
-    list1.clear()
-    list2.clear()
+    # 计算今天所有十二时辰的八字
+    shiershichen = []
+    for item in list(result.values()):
+        list1 = []
+        list2 = []
+        list1.append(response.json()['year_pillar'][0])
+        list2.append(response.json()['year_pillar'][1])
+        list1.append(response.json()['month_pillar'][0])
+        list2.append(response.json()['month_pillar'][1])
+        list1.append(response.json()['day_pillar'][0])
+        list2.append(response.json()['day_pillar'][1])
+        list1.append(item[0])
+        list2.append(item[1])
+        shiershichen.append([list1[::],list2[::]])
+        list1.clear()
+        list2.clear()
 
-# 计算用户八字的五行力量
-bazi = [['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
-_,bazi_wuxing_scale = wuxingliliang(bazi)
+    # 计算用户八字的五行力量
+    _,bazi_wuxing_scale = wuxingliliang(bazi)
 
-# 计算今天所有十二时辰的五行力量
-sizhu_wuxing_scale = []
-for item in shiershichen:
-    _,wuxing_scale = wuxingliliang(item)
-    sizhu_wuxing_scale.append(wuxing_scale)
-    # print(sizhu_wuxing_scale[-1])
+    # 计算今天所有十二时辰的五行力量
+    sizhu_wuxing_scale = []
+    for item in shiershichen:
+        _,wuxing_scale = wuxingliliang(item)
+        sizhu_wuxing_scale.append(wuxing_scale)
+        # print(sizhu_wuxing_scale[-1])
 
-# 计算今天所有十二时辰五行力量与用户八字五行力量的和
-hebazi_scale = []
-for i in range(len(sizhu_wuxing_scale)):
-    temp = {}
-    for key in list(bazi_wuxing_scale.keys()):
-        temp[key] = round(float(sizhu_wuxing_scale[i][key][:-1])+float(bazi_wuxing_scale[key][:-1]),3)
-    hebazi_scale.append(copy.deepcopy(temp))
-    # print(hebazi_scale[-1])
-    # 根据五行力量的强弱重新从大到小排序
-    hebazi_scale[-1] = dict(sorted(hebazi_scale[-1].items(), key=lambda item: item[1]))
-    # print(hebazi_scale[-1])
-    # print("****************")
-
-
-# 获取各个时辰的幸运的东西
-all = {}
-keys = list(result.keys())
-for i in range(len(keys)):
-    all[keys[i]] = {"合后五行力量":hebazi_scale[i],"各种幸运":get_xingyun(list(hebazi_scale[i].keys())[0])}
+    # 计算今天所有十二时辰五行力量与用户八字五行力量的和
+    hebazi_scale = []
+    for i in range(len(sizhu_wuxing_scale)):
+        temp = {}
+        for key in list(bazi_wuxing_scale.keys()):
+            temp[key] = round(float(sizhu_wuxing_scale[i][key][:-1])+float(bazi_wuxing_scale[key][:-1]),3)
+        hebazi_scale.append(copy.deepcopy(temp))
+        # print(hebazi_scale[-1])
+        # 根据五行力量的强弱重新从大到小排序
+        hebazi_scale[-1] = dict(sorted(hebazi_scale[-1].items(), key=lambda item: item[1]))
+        # print(hebazi_scale[-1])
+        # print("****************")
 
 
-# 当前时间所处时辰，对应的数据
-hour = int(now.strftime("%H"))
-minute = int(now.strftime("%M"))
-# 获取当前时间的时辰
-current_shichen = get_chinese_hour(hour, minute)
-print(f"当前时间对应的时辰是：{current_shichen}")
-print(f"数据为：{all[current_shichen]}")
+    # 获取各个时辰的幸运的东西
+    all = {}
+    keys = list(result.keys())
+    for i in range(len(keys)):
+        all[keys[i]] = {"合后五行力量":hebazi_scale[i],"各种幸运":get_xingyun(list(hebazi_scale[i].keys())[0])}
+
+    # 获取当前时间的时辰
+    current_shichen = get_chinese_hour(hour, minute)
+    print(f"当前时间对应的时辰是：{current_shichen}")
+    print(f"数据为：{all[current_shichen]}")
+    return current_shichen,all[current_shichen],all
 
 
+tiaoxi([['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']],"2024-10-28T11:04:54")
