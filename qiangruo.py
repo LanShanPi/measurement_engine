@@ -340,24 +340,40 @@ def get_qiangruo(bazi):
         shengfu_scale += float(wuxing_scale[item].strip("%"))
     for item in kexie:
         kexie_scale += float(wuxing_scale[item].strip("%"))
-    if shengfu_scale >=0 and shengfu_scale < 12.5:
+    if shengfu_scale >=0 and shengfu_scale < 6.25:
+        return "极至弱"
+    elif shengfu_scale >=6.25 and shengfu_scale < 12.5:
         return "极弱"
-    elif shengfu_scale >= 12.5 and shengfu_scale < 25:
+    elif shengfu_scale >= 12.5 and shengfu_scale < 18.75:
         return "太弱"
-    elif shengfu_scale >= 25 and shengfu_scale < 37.5:
+    elif shengfu_scale >= 18.75 and shengfu_scale < 25:
+        return "过弱"
+    elif shengfu_scale >= 25 and shengfu_scale < 31.25:
+        return "很弱"
+    elif shengfu_scale >= 31.25 and shengfu_scale < 37.5:
         return "弱"
-    elif shengfu_scale >= 37.5 and shengfu_scale < 50:
+    elif shengfu_scale >= 37.5 and shengfu_scale < 43.75:
         return "偏弱"
+    elif shengfu_scale >= 43.75 and shengfu_scale < 50:
+        return "稍弱"
     elif shengfu_scale >= 50 and shengfu_scale < 56.25:
         return "中和"
-    elif shengfu_scale >= 56.25 and shengfu_scale < 68.75:
+    elif shengfu_scale >= 56.25 and shengfu_scale < 62.5:
+        return "稍强"
+    elif shengfu_scale >= 62.5 and shengfu_scale < 68.75:
         return "偏强"
-    elif shengfu_scale >= 68.75 and shengfu_scale < 81.25:
+    elif shengfu_scale >= 68.75 and shengfu_scale < 75:
         return "强"
-    elif shengfu_scale >= 81.25 and shengfu_scale <= 93.75:
+    elif shengfu_scale >= 75 and shengfu_scale < 81.25:
+        return "很强"
+    elif shengfu_scale >= 81.25 and shengfu_scale <= 87.5:
+        return "过强"
+    elif shengfu_scale >= 87.5 and shengfu_scale <= 93.75:
         return "太强"
-    elif shengfu_scale >= 93.75 and shengfu_scale <= 100:
+    elif shengfu_scale >= 93.75 and shengfu_scale < 100:
         return "极强"
+    elif shengfu_scale > 100:
+        return "极至强"
 
 
 def wuxingliliang(bazi):
@@ -394,10 +410,10 @@ def wuxingliliang(bazi):
 # bazi = [["丁","丁","甲","癸"],["亥","未","子","酉"]]
 # bazi = [['丙', '甲', '丙', '甲'],['寅', '午', '午', '午']]
 # bazi = [['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
-bazi = [['甲', '甲', '乙', '丙'], ['辰', '戌', '丑', '子']]
+# bazi = [['甲', '甲', '乙', '丙'], ['辰', '戌', '丑', '子']]
 
-bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
-print(wuxing_score)
+# bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
+# print(wuxing_score)
 # # 计算身强身弱
-# qiangruo = get_qiangruo(bazi_sfzk,wuxing_scale)
+# qiangruo = get_qiangruo(bazi)
 # print(qiangruo)
