@@ -79,7 +79,24 @@ def get_guiqi(group1_score, group2_score):
     - group2_score: 正面关系总分（六合、三合、拱合）
     """
     score = group1_score+group2_score
-    pass
+    if score <= -3 or score >= 3:
+        return "天赐"
+    elif score > -3 and score <= -2.175:
+        return "初绽"
+    elif score > -2.175 and score <= -1.35:
+        return "含光"
+    elif score > -1.35 and score <= -0.525:
+        return "清扬"
+    elif score > -0.525 and score <= 0.3:
+        return "明华"
+    elif score > 0.3 and score <= 0.975:
+        return "属泽"
+    elif score > 0.975 and score <= 1.65:
+        return "灵瑞"
+    elif score > 1.65 and score <= 2.325:
+        return "煊耀"
+    elif score > 2.325 and score < 3:
+        return "辉煌"
 
 
 def main(bazi):

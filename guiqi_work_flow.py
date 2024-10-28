@@ -72,36 +72,30 @@ def normal_cdf(z):
     return 0.5 * (1 + math.erf(z / math.sqrt(2)))
 
 def get_guiqi(group1_score,group2_score):
-    # 计算贵气程度，全冲全合的最大值为4.67
-    if group2_score == 0 or group1_score == 0 or group1_score == group2_score:
-        return "极至贵"
-    # 计算分值差
-    diff = group2_score - group1_score  # 正面减负面
-    # 正态分布参数（均值 = 0，标准差 = 1）
-    mean = 0
-    std_dev = 1  # 标准差
-    # 计算 Z 分数
-    z_score = (diff - mean) / std_dev
-    # 使用累积分布函数计算百分位
-    percentile = normal_cdf(z_score)
-
-    # 根据百分位判断评级
-    if percentile >= 0.999:
-        return "极至贵"
-    elif percentile >= 0.997:
-        return "至贵"
-    elif percentile >= 0.95:
-        return "大贵"
-    elif percentile >= 0.75:
-        return "上贵"
-    elif percentile >= 0.25:
-        return "中贵"
-    elif percentile >= 0.05:
-        return "稍贱"
-    elif percentile >= 0.003:
-        return "下贱"
-    else:
-        return "绝下贱"
+    """
+    根据正面和负面关系的比值和差值来计算命格评级。
+    - group1_score: 负面关系总分（刑冲害破）
+    - group2_score: 正面关系总分（六合、三合、拱合）
+    """
+    score = group1_score+group2_score
+    if score <= -3 or score >= 3:
+        return "天赐"
+    elif score > -3 and score <= -2.175:
+        return "初绽"
+    elif score > -2.175 and score <= -1.35:
+        return "含光"
+    elif score > -1.35 and score <= -0.525:
+        return "清扬"
+    elif score > -0.525 and score <= 0.3:
+        return "明华"
+    elif score > 0.3 and score <= 0.975:
+        return "属泽"
+    elif score > 0.975 and score <= 1.65:
+        return "灵瑞"
+    elif score > 1.65 and score <= 2.325:
+        return "煊耀"
+    elif score > 2.325 and score < 3:
+        return "辉煌"
 
 def main(bazi):
     # 计算八字中地支的所有关系及其得分

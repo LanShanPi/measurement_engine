@@ -6,6 +6,30 @@
 
 from itertools import combinations
 
+tiangan_dizhi = {
+        "甲":["阳","木"],
+        "乙":["阴","木"],
+        "丙":["阳","火"],
+        "丁":["阴","火"],
+        "戊":["阳","土"],
+        "己":["阴","土"],
+        "庚":["阳","金"],
+        "辛":["阴","金"],
+        "壬":["阳","水"],
+        "癸":["阴","水"],
+        "子":["阳","水"],
+        "丑":["阴","土"],
+        "寅":["阳","木"],
+        "卯":["阴","木"],
+        "辰":["阳","土"],
+        "巳":["阴","火"],
+        "午":["阳","火"],
+        "未":["阴","土"],
+        "申":["阳","金"],
+        "酉":["阴","金"],
+        "戌":["阳","土"],
+        "亥":["阴","水"],
+    }
 
 def count_earthly_branch_combinations(bazi):
 
@@ -175,7 +199,7 @@ def get_yueling_wangxiangxiuqiusi(yueling,rizhu_wuxing):
     }
     for item in wxxqs.keys():
         if yueling in item:
-            print(f"月令为:{yueling},日柱五行为：{rizhu_wuxing},月令分为：{wxxqs[item][rizhu_wuxing]*50}")
+            # print(f"月令为:{yueling},日柱五行为：{rizhu_wuxing},月令分为：{wxxqs[item][rizhu_wuxing]*50}")
             return wxxqs[item][rizhu_wuxing]*50
 
             
@@ -193,7 +217,7 @@ def get_bazi_score(wuxing_score,bazi,tiangan_dizhi):
     for j in range(len(bazi_wuxing[0])):
         if list(bazi_wuxing[0][j].values())[0][2] not in ["Y"]:
             # 去掉月令
-            print(f"八字位置:{list(bazi_wuxing[0][j].values())[0][1]},得分：{list(bazi_wuxing[0][j].values())[0][3]}")
+            # print(f"八字位置:{list(bazi_wuxing[0][j].values())[0][1]},得分：{list(bazi_wuxing[0][j].values())[0][3]}")
             wuxing_score[list(bazi_wuxing[0][j].values())[0][1]] += list(bazi_wuxing[0][j].values())[0][3]
     
     # 藏干表
@@ -214,9 +238,7 @@ def get_bazi_score(wuxing_score,bazi,tiangan_dizhi):
     dizhicanggan = []
     for i in range(len(bazi[1])):
         dizhicanggan.append(canggan[bazi[1][i]])
-    print(dizhicanggan)
     # 计算藏干得分
-    print(wuxing_score)
     for i in range(len(dizhicanggan)):
         if i == 1:
             continue
@@ -233,13 +255,13 @@ def get_bazi_score(wuxing_score,bazi,tiangan_dizhi):
             canggan_list = list(dizhicanggan[i])
             for index,item in  enumerate(canggan_list):
                 if index == 0:
-                    print(f"藏干：{tiangan_dizhi[item][1]},得分{list(bazi_wuxing[1][i].values())[0][3]*0.65}")
+                    # print(f"藏干：{tiangan_dizhi[item][1]},得分{list(bazi_wuxing[1][i].values())[0][3]*0.65}")
                     wuxing_score[tiangan_dizhi[item][1]] += list(bazi_wuxing[1][i].values())[0][3]*0.65
                 elif index == 1:
-                    print(f"藏干：{tiangan_dizhi[item][1]},得分{list(bazi_wuxing[1][i].values())[0][3]*0.25}")
+                    # print(f"藏干：{tiangan_dizhi[item][1]},得分{list(bazi_wuxing[1][i].values())[0][3]*0.25}")
                     wuxing_score[tiangan_dizhi[item][1]] += list(bazi_wuxing[1][i].values())[0][3]*0.25
                 else:
-                    print(f"藏干：{tiangan_dizhi[item][1]},得分{list(bazi_wuxing[1][i].values())[0][3]*0.10}")
+                    # print(f"藏干：{tiangan_dizhi[item][1]},得分{list(bazi_wuxing[1][i].values())[0][3]*0.10}")
                     wuxing_score[tiangan_dizhi[item][1]] += list(bazi_wuxing[1][i].values())[0][3]*0.10
     return wuxing_score,dizhicanggan
 
@@ -269,7 +291,7 @@ def get_hehua_score(wuxing_score,bazi):
     counts = count_earthly_branch_combinations(bazi)
     for (category, comb, *element), count in counts.items():
         if category in ["三合","三会","六合","半三合","半三会","拱合"]:
-            print(''.join(comb) if isinstance(comb, tuple) else ''.join(comb),category,element,count)
+            # print(''.join(comb) if isinstance(comb, tuple) else ''.join(comb),category,element,count)
             hehua_name.append(category)
             hehuayuansu.append(element[0][-2])
             hehua_num.append(int(count))
@@ -278,9 +300,8 @@ def get_hehua_score(wuxing_score,bazi):
         if yueling in item:
             for i in range(len(hehua_name)):
                 wuxing_score[hehuayuansu[i]] += wxxqs[item][hehuayuansu[i]]*50*hehua[hehua_name[i]][-1]*hehua_num[i]
-                if hehuayuansu[i] == "金":
-                    print("aldjsflajsdfljasdlkfj")
-                    print(wxxqs[item][hehuayuansu[i]]*50*hehua[hehua_name[i]][-1]*hehua_num[i])
+                # if hehuayuansu[i] == "金":
+                #     print(wxxqs[item][hehuayuansu[i]]*50*hehua[hehua_name[i]][-1]*hehua_num[i])
             break
 
 
@@ -338,9 +359,7 @@ def get_qiangruo(bazi_sfzk,wuxing_scale):
         return "极强"
 
 
-
-
-def main():
+def wuxingliliang(bazi):
         wuxing_score = {
                 "金":0,
                 "木":0,
@@ -351,13 +370,10 @@ def main():
         # 计算月令五行得分
         yueling_wuxing,yueling_score = get_yueling_score(bazi)
         wuxing_score[yueling_wuxing] += yueling_score
-        print(wuxing_score)
         # 计算八字五行力量
         wuxing_score,dizhicanggan = get_bazi_score(wuxing_score,bazi,tiangan_dizhi)
-        print(wuxing_score)
         # 计算合化力量
         wuxing_score,xchhp = get_hehua_score(wuxing_score,bazi)
-        print(wuxing_score)
         # 计算总和
         total = sum(wuxing_score.values())
         # 计算占比
@@ -366,44 +382,21 @@ def main():
         # 计算日元的生扶克泄
         bazi_wuxing = tiangan_dizhi[bazi[0][2]][1]
         bazi_sfzk = compute_bazisfkx(bazi_wuxing)
-        print(bazi_sfzk)
-        print(wuxing_scale)
-        # 计算身强身弱
-        qiangruo = get_qiangruo(bazi_sfzk,wuxing_scale)
-        print(qiangruo)
+        return bazi_sfzk,wuxing_scale
 
-if __name__ == "__main__":
 
-    # bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
-    # bazi = [ ['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
-    # bazi = [["庚","癸","庚","丙"],["午","未","辰","子"]]
-    # bazi = [["癸","壬","甲","甲"],["酉","戌","子","子"]]
-    # bazi = [["丁","丁","甲","癸"],["亥","未","子","酉"]]
-    # bazi = [['丙', '甲', '丙', '甲'],['寅', '午', '午', '午']]
-    bazi = [['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
-    tiangan_dizhi = {
-        "甲":["阳","木"],
-        "乙":["阴","木"],
-        "丙":["阳","火"],
-        "丁":["阴","火"],
-        "戊":["阳","土"],
-        "己":["阴","土"],
-        "庚":["阳","金"],
-        "辛":["阴","金"],
-        "壬":["阳","水"],
-        "癸":["阴","水"],
-        "子":["阳","水"],
-        "丑":["阴","土"],
-        "寅":["阳","木"],
-        "卯":["阴","木"],
-        "辰":["阳","土"],
-        "巳":["阴","火"],
-        "午":["阳","火"],
-        "未":["阴","土"],
-        "申":["阳","金"],
-        "酉":["阴","金"],
-        "戌":["阳","土"],
-        "亥":["阴","水"],
-    }
-    main()
 
+# bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
+# bazi = [ ['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
+# bazi = [["庚","癸","庚","丙"],["午","未","辰","子"]]
+# bazi = [["癸","壬","甲","甲"],["酉","戌","子","子"]]
+# bazi = [["丁","丁","甲","癸"],["亥","未","子","酉"]]
+# bazi = [['丙', '甲', '丙', '甲'],['寅', '午', '午', '午']]
+# bazi = [['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
+# bazi = [['甲', '甲', '乙', '丙'], ['辰', '戌', '丑', '子']]
+
+# bazi_sfzk,wuxing_scale = wuxingliliang(bazi)
+# print(wuxing_scale)
+# # 计算身强身弱
+# qiangruo = get_qiangruo(bazi_sfzk,wuxing_scale)
+# print(qiangruo)
