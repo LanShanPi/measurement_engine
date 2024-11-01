@@ -125,7 +125,7 @@ def tiaoxi(bazi,date=None):
         list2.clear()
 
     # 计算用户八字的五行力量
-    _,bazi_wuxing_scale,bazi_wuxing_score = wuxingliliang(bazi)
+    bazi_sfkx,bazi_wuxing_scale,bazi_wuxing_score = wuxingliliang(bazi)
 
     # 计算今天所有十二时辰的五行力量
     sizhu_wuxing_score = []
@@ -147,11 +147,12 @@ def tiaoxi(bazi,date=None):
         total = sum(temp.values())
         # 计算占比
         percentage_data = {k: (v / total) * 100 for k, v in temp.items()}
-        hebazi_scale.append({k: str(round(v, 3))+"%" for k, v in percentage_data.items()})
+        hebazi_scale.append({k: round(v, 3) for k, v in percentage_data.items()})
         # 根据五行力量的强弱重新从大到小排序
         hebazi_score[-1] = dict(sorted(hebazi_score[-1].items(), key=lambda item: item[1]))
         hebazi_scale[-1] = dict(sorted(hebazi_scale[-1].items(), key=lambda item: item[1]))
-        # print(hebazi_scale[-1])
+        # 加上百分号
+        hebazi_scale[-1] = {k:str(v)+"%" for k,v in hebazi_scale[-1].items()}
         # print("****************")
         temp.clear()
 
@@ -160,8 +161,12 @@ def tiaoxi(bazi,date=None):
     # 获取各个时辰的幸运的东西
     all = {}
     keys = list(result.keys())
+    print(bazi_sfkx)
     for i in range(len(keys)):
+        print(hebazi_scale[i])
         all[keys[i]] = {"合后五行力量":hebazi_scale[i],"各种幸运":get_xingyun(list(hebazi_scale[i].keys())[0])}
+
+
     # 获取当前时间的时辰
     current_shichen = get_chinese_hour(hour, minute)
 
