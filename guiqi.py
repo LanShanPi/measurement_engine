@@ -38,7 +38,6 @@ all_relationships = {
 def count_earthly_branch_combinations_with_scores(bazi):
     count_dict = defaultdict(float)  # 使用 defaultdict 来简化计数逻辑
     branches = bazi[1]  # 取出地支部分
-
     # 遍历所有类型的关系
     for category, (relationships, base_score) in all_relationships.items():
         for comb in relationships:
@@ -62,9 +61,9 @@ def calculate_position_score(indices):
     if max_gap == 0:
         return 1  # 相邻（间隔为 0），位置系数为 1
     elif max_gap == 1:
-        return 2 / 3  # 间隔为 1，位置系数为 2/3
+        return 0.66  # 间隔为 1，位置系数为 2/3
     elif max_gap == 2:
-        return 1 / 3  # 间隔为 2，位置系数为 1/3
+        return 0.33  # 间隔为 2，位置系数为 1/3
     else:
         return 0  # 超过两个间隔不计算分数
 
@@ -72,31 +71,47 @@ def normal_cdf(z):
     """计算标准正态分布的累积分布函数 (CDF)。"""
     return 0.5 * (1 + math.erf(z / math.sqrt(2)))
 
-def get_guiqi(group1_score, group2_score):
-    """
-    根据正面和负面关系的比值和差值来计算命格评级。
-    - group1_score: 负面关系总分（刑冲害破）
-    - group2_score: 正面关系总分（六合、三合、拱合）
-    """
-    score = group1_score+group2_score
-    if score <= -3 or score >= 3:
-        return "天赐"
-    elif score > -3 and score <= -2.175:
-        return "初绽"
-    elif score > -2.175 and score <= -1.35:
-        return "含光"
-    elif score > -1.35 and score <= -0.525:
-        return "清扬"
-    elif score > -0.525 and score <= 0.3:
-        return "明华✨"
-    elif score > 0.3 and score <= 0.975:
-        return "属泽"
-    elif score > 0.975 and score <= 1.65:
-        return "灵瑞"
-    elif score > 1.65 and score <= 2.325:
-        return "煊耀"
-    elif score > 2.325 and score < 3:
-        return "辉煌"
+def get_guiqi(lv,score):
+    # """
+    # 根据正面和负面关系的比值和差值来计算命格评级。
+    # - group1_score: 负面关系总分（刑冲害破）
+    # - group2_score: 正面关系总分（六合、三合、拱合）
+    # """
+    # score = group1_score+group2_score
+    # if score <= -3 or score >= 3:
+    #     return "天赐"
+    # elif score > -3 and score <= -2.175:
+    #     return "初绽"
+    # elif score > -2.175 and score <= -1.35:
+    #     return "含光"
+    # elif score > -1.35 and score <= -0.525:
+    #     return "清扬"
+    # elif score > -0.525 and score <= 0.3:
+    #     return "明华✨"
+    # elif score > 0.3 and score <= 0.975:
+    #     return "属泽"
+    # elif score > 0.975 and score <= 1.65:
+    #     return "灵瑞"
+    # elif score > 1.65 and score <= 2.325:
+    #     return "煊耀"
+    # elif score > 2.325 and score < 3:
+    #     return "辉煌"
+
+    if score <= -3 or score >= 3 or (score >= -0.3 and score <= 0.3):
+        name = "皇极至尊"
+    elif (score > -3 and score <= -2.1) or (score > 0.3 and score <= 1.2):
+        name = "传奇卓越"
+    elif (score > -2.1 and score <= -1.2) or (score > 1.2 and score <= 2.1):
+        name = "天命贵胄"
+    elif (score > -1.2 and score < -0.3) or (score > 2.1 and score < 3):
+        name = "最强王者"
+    
+    if lv == "lv-1":
+        return "帝皇之贵"+"-"+name
+    elif lv == "lv-2":
+        return "侯爵之贵"+"-"+name
+    else:
+        return "士绅之贵"+"-"+name
 
 # 定义一个函数来判断给定的两个地支是否属于某种关系
 def check_relationship(pair, relationships):
@@ -157,6 +172,8 @@ def get_struction(bazi):
     return num1[0],num2[0]
 
 
+    
+
 def guiqi_level(bazi):
     # 计算八字中地支的所有关系及其得分
     counts = count_earthly_branch_combinations_with_scores(bazi)
@@ -187,19 +204,20 @@ def guiqi_level(bazi):
         print(f"地支中存在<{num1}>个对消组合，则总分数要除以：{2**num1}")
         total_score /= (2**num1)
         print(f"修正后的总分为{total_score}")
-        return "lv-1",total_score,"极贵"
+        name = get_guiqi("lv-1",total_score)
+        return "lv-1",total_score,name
     
     # 等级2
     if num2 != 0:
         print(f"地支中存在<{num2}>个对消组合，则总分数要除以：{2**num2}")
         total_score /= (2**num2)
         print(f"修正后的总分为{total_score}")
-        return "lv-2",total_score,"极贵"
+        name = get_guiqi("lv-2",total_score)
+        return "lv-2",total_score,name
     
     # 等级3
-    # 计算贵气程度
-    guiqi_dengji = get_guiqi(group1_score,group2_score)
-    return guiqi_dengji
+    name = get_guiqi("lv-3",total_score)
+    return "lv-3",total_score,name
 
 
 # bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]

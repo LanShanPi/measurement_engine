@@ -44,7 +44,7 @@ def count_earthly_branch_combinations(bazi):
             (("子", "卯"),"无礼之刑")
         ],
         "半三刑": [
-            ("寅", "巳"), ("巳", "申")
+            ("寅", "巳"), ("巳", "申"),("子", "卯"),("丑","戌"),("戌","未")
         ],
         "害": [
             ("子", "未"), ("丑", "午"), ("寅", "巳"),
@@ -75,7 +75,8 @@ def count_earthly_branch_combinations(bazi):
             (("卯", "戌"), "火局"),
             (("辰", "酉"), "金局"),
             (("巳", "申"), "水局"),
-            (("午", "未"), "火或土局")
+            (("午", "未"), "火或土局"),
+            (("寅","亥"), "木局")
         ],
         "半三合": [
             (("申", "子"), "半合水局"),
@@ -413,11 +414,11 @@ def wuxingliliang(bazi):
 # bazi = [['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
 # bazi = [['甲', '甲', '乙', '丙'], ['辰', '戌', '丑', '子']]
 # bazi = [["乙","己","辛","庚"],["丑","丑","酉","寅"]]
-bazi = [["癸","甲","丙","壬"],["亥","寅","子","辰"]]
-bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
-print(bazi_sfzk)
-print(wuxing_scale)
-print(wuxing_score)
-# 计算身强身弱
-qiangruo = get_qiangruo(bazi)
-print(qiangruo)
+# bazi = [["癸","甲","丙","壬"],["亥","寅","子","辰"]]
+# bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
+# print(bazi_sfzk)
+# print(wuxing_scale)
+# print(wuxing_score)
+# # 计算身强身弱
+# qiangruo = get_qiangruo(bazi)
+# print(qiangruo)

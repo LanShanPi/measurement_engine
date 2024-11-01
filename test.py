@@ -127,34 +127,84 @@ from datetime import datetime
 #     test_bazi_get()
 
 
-def test_bazi_api():
-    """测试八字分析接口"""
-    # API地址
-    url = "http://42.123.114.119:8595/wuxing_analysis_get"
+# def test_bazi_api():
+#     """测试八字分析接口"""
+#     # API地址
+#     url = "http://42.123.114.119:8595/wuxing_analysis_get"
     
-    # 测试数据
-    payload = {
-        "tiangan": "甲,丙,己,甲",
-        "dizhi": "戌,子,卯,戌"
-    }
+#     # 测试数据
+#     payload = {
+#         "tiangan": "甲,丙,己,甲",
+#         "dizhi": "戌,子,卯,戌"
+#     }
     
-    try:
-        # 发送POST请求
-        print("\n正在发送请求...")
-        response = requests.post(url, json=payload)
+#     try:
+#         # 发送POST请求
+#         print("\n正在发送请求...")
+#         response = requests.post(url, json=payload)
         
-        # 检查响应状态
-        print(f"状态码: {response.status_code}")
+#         # 检查响应状态
+#         print(f"状态码: {response.status_code}")
         
-        # 打印响应结果
-        print("\n响应结果:")
-        result = response.json()
-        print(json.dumps(result, ensure_ascii=False, indent=2))
+#         # 打印响应结果
+#         print("\n响应结果:")
+#         result = response.json()
+#         print(json.dumps(result, ensure_ascii=False, indent=2))
         
-    except requests.exceptions.ConnectionError:
-        print("错误: 无法连接到服务器，请确保服务器已启动")
-    except Exception as e:
-        print(f"错误: {str(e)}")
+#     except requests.exceptions.ConnectionError:
+#         print("错误: 无法连接到服务器，请确保服务器已启动")
+#     except Exception as e:
+#         print(f"错误: {str(e)}")
 
-if __name__ == "__main__":
-    test_bazi_api()
+# if __name__ == "__main__":
+#     test_bazi_api()
+
+
+# 定义三合和三会组合及其对应的局
+three_combinations = {
+    "三合": {
+        frozenset(["申", "子", "辰"]): "水局",
+        frozenset(["寅", "午", "戌"]): "火局",
+        frozenset(["巳", "酉", "丑"]): "金局",
+        frozenset(["亥", "卯", "未"]): "木局",
+        frozenset(["辰", "戌", "丑", "未"]): "土局"
+    },
+    "三会": {
+        frozenset(["寅", "卯", "辰"]): "木局",
+        frozenset(["巳", "午", "未"]): "火局",
+        frozenset(["亥", "子", "丑"]): "水局",
+        frozenset(["申", "酉", "戌"]): "金局"
+    }
+}
+
+# 八字实例
+bazi = [["庚","壬","甲","庚"],["子", "丑", "亥", "申"]]
+
+# 获取地支部分
+earthly_branches = set(bazi[1])  # 将地支部分转换为集合以便检查
+
+# 定义一个函数来检查地支中是否包含三合或三会组合
+def check_three_combinations(branches, combinations):
+    result = {"三合": [], "三会": []}
+    for combo_type, combo_dict in combinations.items():
+        for combo_set, ju in combo_dict.items():
+            # 判断组合是否为地支的子集
+            if combo_set.issubset(branches):
+                result[combo_type].append((combo_set, ju))
+    return result
+
+# 检查八字中的三合和三会
+result = check_three_combinations(earthly_branches, three_combinations)
+
+print(result["三会"][0][1])
+
+# 输出结果
+for combo_type, combos in result.items():
+    if combos:
+        print(f"在八字中找到了{combo_type}组合:")
+        for combo_set, ju in combos:
+            combo_list = list(combo_set)
+            print(f"  {combo_type} {combo_list} -> {ju}")
+    else:
+        print(f"在八字中未找到{combo_type}组合。")
+
