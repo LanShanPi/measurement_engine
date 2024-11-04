@@ -138,9 +138,27 @@ def get_biange(bazi):
     liujia = ["子","寅","辰","午","申","戌"]
     if bazi[0][2] == "甲" and bazi[1][2] in liujia and bazi[1][3] == "亥" and "寅" not in bazi[1]:
         return "六甲趋乾"
+    
+    # 财官双美
+    lumatongxiang = ["壬午","癸巳"]
+    if bazi[0][2]+bazi[1][2] in lumatongxiang:
+        return "财官双美"
+    
+    # 金神格
+    shizhu = ["癸酉","己巳","乙丑"]
+    rizhu = ["甲子","甲辰"]
+    # pass
 
+    # 魁罡格
+    kuigang = ["庚辰","庚戌","壬辰","戊戌"]
+    if bazi[0][2]+bazi[1][2] in kuigang:
+        return "魁罡格"
+    
+    # 子午双包
+    # 待写
+    
 
-
+ 
 def get_zhengbage(bazi):
     rigan_wuxing = tiangan_dizhi[bazi[0][2]][1]
     yuezhi_wuxing = tiangan_dizhi[bazi[1][1]][1]
