@@ -105,8 +105,39 @@ def get_biange(bazi):
     if guanxing in bazi[0] and guanxing+bazi[1][bazi[0].index(guanxing)] in lu:
         return "官星坐禄"
     
-    # 拱禄拱贵：王侯贵命
+    # 拱禄拱贵：王侯贵命（拱出的禄位不能填实，即不能出现在地支中）
+    # 每个元素前两个字是日柱，后两个字是时柱
+    gonglu = {"癸亥癸丑":"拱出子禄","癸丑癸亥":"拱出子禄","丁巳丁未":"拱出午禄","己未己巳":"拱出午禄","戊辰戊午":"拱出已禄"}
+    gonggui = {"甲申甲戌":"拱出酉中辛金为贵","乙未乙酉":"拱出申中庚金为官","甲寅甲子":"拱出丑中辛金","戊申戊午":"可拱出未中乙木","辛丑辛卯":"拱出寅中丙火"}
+    rizhushizhu = bazi[0][2]+bazi[1][2]+bazi[0][3]+bazi[1][3]
+    if rizhushizhu in list(gonglu) or rizhushizhu in list(gonggui):
+        return "拱禄拱贵"
     
+    # 冲禄：贵命（首先计算日干所在禄位，然后计算禄位对应的六冲符号，日支必须是该六冲符号，且年，月，时支必须存在该六冲符号，且禄位必须不能存在于地支中）
+    liuchong = ["子午", "丑未","寅申","卯酉", "辰戌", "巳亥"]
+    # 计算日干所在的禄位
+    lu = {"甲":"寅","乙":"卯","丙":"巳","丁":"午","戊":"巳","己":"午","庚":"申","辛":"酉","壬":"亥","癸":"子"}
+    lu_wei = lu[bazi[0][2]]
+    # 计算禄位对应的六冲符号
+    for item in liuchong:
+        if lu_wei in item:
+            chonglu = item.replace(item,"")
+    # 计算地支中禄位对应的六冲符号是否大于2，且日支是否为禄位对应的六冲符号，且禄位符号不存在于地支中
+    chonglu_num = bazi[1].count(chonglu)
+    if lu_wei not in bazi[1] and chonglu_num >= 2 and bazi[1][2] == chonglu:
+        return "冲禄"
+        
+    # 六壬趋艮（六壬日遇到甲寅时,合出亥中壬水即有了禄）
+    # 六壬日中的地支
+    liuren = ["子","寅","辰","午","申","戌"]
+    if bazi[0][2] == "壬" and bazi[1][2] in liuren and (bazi[0][3]+bazi[1][3] == "甲寅") and "亥" not in bazi[1]:
+        return "六壬趋艮"
+    
+    # 六甲趋乾(六甲日遇见亥时)
+    # 六甲日中的地支
+    liujia = ["子","寅","辰","午","申","戌"]
+    if bazi[0][2] == "甲" and bazi[1][2] in liujia and bazi[1][3] == "亥" and "寅" not in bazi[1]:
+        return "六甲趋乾"
 
 
 

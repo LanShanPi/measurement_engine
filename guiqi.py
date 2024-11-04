@@ -99,11 +99,11 @@ def get_guiqi(lv,score):
 
     if score <= -3 or score >= 3 or (score >= -0.3 and score <= 0.3):
         name = "皇极至尊"
-    elif (score > -3 and score <= -2.1) or (score > 0.3 and score <= 1.2):
+    elif (score > -3 and score <= -2.1) or (score > 2.1 and score < 3):
         name = "传奇卓越"
     elif (score > -2.1 and score <= -1.2) or (score > 1.2 and score <= 2.1):
         name = "天命贵胄"
-    elif (score > -1.2 and score < -0.3) or (score > 2.1 and score < 3):
+    elif (score > -1.2 and score < -0.3) or (score > 0.3 and score <= 1.2):
         name = "最强王者"
     
     if lv == "lv-1":
