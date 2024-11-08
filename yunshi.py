@@ -4,6 +4,30 @@ from datetime import datetime
 import requests
 import copy
 
+tiangan_dizhi = {
+        "甲":["阳","木"],
+        "乙":["阴","木"],
+        "丙":["阳","火"],
+        "丁":["阴","火"],
+        "戊":["阳","土"],
+        "己":["阴","土"],
+        "庚":["阳","金"],
+        "辛":["阴","金"],
+        "壬":["阳","水"],
+        "癸":["阴","水"],
+        "子":["阳","水"],
+        "丑":["阴","土"],
+        "寅":["阳","木"],
+        "卯":["阴","木"],
+        "辰":["阳","土"],
+        "巳":["阴","火"],
+        "午":["阳","火"],
+        "未":["阴","土"],
+        "申":["阳","金"],
+        "酉":["阴","金"],
+        "戌":["阳","土"],
+        "亥":["阴","水"],
+    }
 
 def get_hour_pillar(day_stem):
     # 定义天干和地支的列表
@@ -81,7 +105,86 @@ def get_xingyun(yuansu):
     }
     return xingyun[yuansu]
 
-def tiaoxi(bazi,date=None):
+
+def calculate_supplement_element(day_element, five_elements, gender):
+    """
+    根据日元、五行占比和性别计算最需要补充的五行元素。
+    
+    参数:
+    day_element (str): 日元（五行之一：“木”, “火”, “土”, “金”, “水”）
+    five_elements (dict): 当前五行占比，格式如 {'金': 2.125, '火': 5.5, '木': 13.1, '土': 32.125, '水': 47.15}
+    gender (str): 性别 ("female" 表示女性, "male" 表示男性)
+    
+    返回:
+    tuple: 包含各五行需求值的字典和最需要补充的五行元素
+    """
+    # 根据性别设定生扶五行的目标占比
+    target_support_ratio = 45 if gender == "female" else 55
+
+    # 定义生扶五行和消耗五行
+    if day_element == "木":
+        support_elements = ['木', '水']
+        consuming_elements = ['金', '火', '土']
+    elif day_element == "火":
+        support_elements = ['火', '木']
+        consuming_elements = ['水', '金', '土']
+    elif day_element == "土":
+        support_elements = ['土', '火']
+        consuming_elements = ['木', '水', '金']
+    elif day_element == "金":
+        support_elements = ['金', '土']
+        consuming_elements = ['火', '水', '木']
+    elif day_element == "水":
+        support_elements = ['水', '金']
+        consuming_elements = ['土', '木', '火']
+    
+    # 计算当前生扶五行的比例
+    current_support_ratio = sum(float(five_elements[element][:-1]) for element in support_elements)
+    # 计算生扶五行的需求值
+    support_demand = target_support_ratio - current_support_ratio
+    
+    # 计算每个非生扶五行的目标比例
+    target_non_support_ratio = (100 - target_support_ratio) / 3
+
+    # 计算每个五行的需求值
+    demands = {}
+    for element, percentage in five_elements.items():
+        if element in support_elements:
+            # 对生扶五行，需求值取整体生扶需求值（只保留正需求）
+            demand = support_demand if support_demand > 0 else 0
+        else:
+            # 对消耗五行，需求值目标为均衡目标比例
+            demand = target_non_support_ratio - float(percentage[:-1])
+        demands[element] = round(demand,3)
+
+    # 动态设定用神和忌神的权重，依据support_demand绝对值进行分级调整
+    abs_support_demand = abs(support_demand)
+    if abs_support_demand <= 10:  # 支持需求值在0-10之间
+        support_weight = 1.5
+        consume_weight = 0.5
+    elif 10 < abs_support_demand <= 20:  # 支持需求值在10-20之间
+        support_weight = 1.7
+        consume_weight = 0.3
+    else:  # 支持需求值大于20
+        support_weight = 2.0
+        consume_weight = 0.2
+
+    # 根据用神与忌神进行加权：使用动态调整的权重
+    for element in demands:
+        if element in support_elements:
+            demands[element] *= support_weight  # 使用动态调整的用神权重
+        elif element in consuming_elements:
+            demands[element] *= consume_weight  # 使用动态调整的忌神权重
+
+    # 确定需求值最高的五行作为补充优先的五行
+    supplement_element = max(demands, key=demands.get)
+
+    # 返回各五行需求值和建议补充的五行
+    return demands, supplement_element
+
+
+
+def tiaoxi(bazi,date=None,gender="male"):
     if date:
         current_date = date
         time_ = current_date.split("T")[1].split(":")
@@ -163,8 +266,9 @@ def tiaoxi(bazi,date=None):
     keys = list(result.keys())
     print(bazi_sfkx)
     for i in range(len(keys)):
-        print(hebazi_scale[i])
-        all[keys[i]] = {"合后五行力量":hebazi_scale[i],"各种幸运":get_xingyun(list(hebazi_scale[i].keys())[0])}
+        # 计算各个时辰所应补充元素
+        demands,supplement_element = calculate_supplement_element(tiangan_dizhi[bazi[0][2]][1],hebazi_scale[i],gender)
+        all[keys[i]] = {"合后五行力量":hebazi_scale[i],"五行元素需求值":demands,"各种幸运":get_xingyun(supplement_element)}
 
 
     # 获取当前时间的时辰
@@ -172,7 +276,8 @@ def tiaoxi(bazi,date=None):
 
     print(f"当前时间对应的时辰是：{current_shichen}")
     print(f"数据为：{all[current_shichen]}")
+    print(f"合后五行力量：{all[current_shichen]['合后五行力量']}")
     return current_shichen,all[current_shichen],all
 
 
-tiaoxi([['甲', '甲', '乙', '丙'], ['辰', '戌', '丑', '子']],"")
+tiaoxi([['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']],"","male")

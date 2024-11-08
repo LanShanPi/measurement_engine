@@ -237,6 +237,7 @@ def get_biange(bazi):
     if get_dizhi_lianru(bazi):
         return "地支连茹"
 
+    return "不入变格"
     
 
 def get_dizhi_lianru(bazi):

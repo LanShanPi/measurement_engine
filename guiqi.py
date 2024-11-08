@@ -61,7 +61,7 @@ def calculate_position_score(indices):
     if max_gap == 0:
         return 1  # 相邻（间隔为 0），位置系数为 1
     elif max_gap == 1:
-        return 0.66  # 间隔为 1，位置系数为 2/3
+        return 0.67  # 间隔为 1，位置系数为 2/3
     elif max_gap == 2:
         return 0.33  # 间隔为 2，位置系数为 1/3
     else:
@@ -230,8 +230,8 @@ def guiqi_level(bazi):
 # bazi = [['甲', '甲', '乙', '丙'], ['辰', '戌', '丑', '子']]
 # bazi = [["乙","己","辛","庚"],["丑","丑","酉","寅"]]
 # bazi = [["癸","甲","丙","壬"],["亥","寅","子","辰"]]
-bazi = [['丙', '甲', '丙', '甲'], ['子', '午', '子', '丑']]
-print(guiqi_level(bazi))
+# bazi = [['丙', '甲', '丙', '甲'], ['子', '午', '子', '丑']]
+# print(guiqi_level(bazi))
 
 # 2/3统一成0.66
 
