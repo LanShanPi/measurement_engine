@@ -7,9 +7,142 @@ sys.path.append(r"/Users/hzl/Project/measurement_engine/data/")
 from yiji import yiji_
 from jixiong import jixiongshen
 from nayin import nayin_
-from function_tools import get_xun
+from function_tools import get_xun,get_changsheng
+
+def get_pengzu_taboos(input_time=None):
+    """
+    获取彭祖百忌信息（天干百忌和地支百忌）
+    Args:
+        input_time (str, optional): 输入时间，格式为 "YYYY-MM-DD HH:MM:SS"
+                                  如果不传入，则使用当前时间
+    Returns:
+        dict: 包含彭祖百忌信息的字典
+    """
+    if input_time:
+        target_time = datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S")
+    else:
+        target_time = datetime.now()
+        
+    lunar_date = Lunar.fromDate(target_time)
+    result = {}
+    
+    # 获取天干百忌
+    result["天干百忌"] = lunar_date.getPengZuGan()
+    
+    # 获取地支百忌
+    result["地支百忌"] = lunar_date.getPengZuZhi()
+    
+    return result
+
+def get_taishen_positions(input_time=None):
+    """
+    获取胎神方位信息
+    
+    Args:
+        input_time (str, optional): 输入时间，格式为 "YYYY-MM-DD HH:MM:SS"
+                                  如果不传入，则使用当前时间
+    
+    Returns:
+        dict: 包含胎神方位信息的字典
+    """
+    if input_time:
+        target_time = datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S")
+    else:
+        target_time = datetime.now()
+        
+    lunar_date = Lunar.fromDate(target_time)
+    result = {}
+    
+    # 获取逐日胎神方位
+    result["日胎神方位"] = lunar_date.getDayPositionTai()
+    
+    # 获取逐月胎神方位
+    result["月胎神方位"] = lunar_date.getMonthPositionTai()
+    
+    return result
 
 
+def get_daily_jishen_deity_positions(input_time=None):
+    """
+    获取每日神仙方位信息
+    
+    Args:
+        input_time (str, optional): 输入时间，格式为 "YYYY-MM-DD HH:MM:SS"
+                                  如果不传入，则使用当前时间
+    
+    Returns:
+        dict: 包含各类神仙方位信息的字典
+    """
+    if input_time:
+        target_time = datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S")
+    else:
+        target_time = datetime.now()
+        
+    lunar_date = Lunar.fromDate(target_time)
+    result = {}
+    
+    # 喜神
+    result["喜神方位"] = lunar_date.getDayPositionXi()
+    result["喜神方位描述"] = lunar_date.getDayPositionXiDesc()
+    
+    # 阳贵神
+    result["阳贵神方位"] = lunar_date.getDayPositionYangGui()
+    result["阳贵神方位描述"] = lunar_date.getDayPositionYangGuiDesc()
+    
+    # 阴贵神
+    result["阴贵神方位"] = lunar_date.getDayPositionYinGui()
+    result["阴贵神方位描述"] = lunar_date.getDayPositionYinGuiDesc()
+    
+    # 福神
+    result["福神方位"] = lunar_date.getDayPositionFu()
+    result["福神方位描述"] = lunar_date.getDayPositionFuDesc()
+    
+    # 财神
+    result["财神方位"] = lunar_date.getDayPositionCai()
+    result["财神方位描述"] = lunar_date.getDayPositionCaiDesc()
+    
+    return result
+
+def get_hourly_jishen_deity_positions(input_time=None):
+    """
+    获取时辰神仙方位信息
+    
+    Args:
+        input_time (str, optional): 输入时间，格式为 "YYYY-MM-DD HH:MM:SS"
+                                  如果不传入，则使用当前时间
+    
+    Returns:
+        dict: 包含各类神仙方位信息的字典
+    """
+    if input_time:
+        target_time = datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S")
+    else:
+        target_time = datetime.now()
+        
+    lunar_date = Lunar.fromDate(target_time)
+    result = {}
+    
+    # 喜神
+    result["喜神方位"] = lunar_date.getTimePositionXi()
+    result["喜神方位描述"] = lunar_date.getTimePositionXiDesc()
+    
+    # 阳贵神
+    result["阳贵神方位"] = lunar_date.getTimePositionYangGui()
+    result["阳贵神方位描述"] = lunar_date.getTimePositionYangGuiDesc()
+    
+    # 阴贵神
+    result["阴贵神方位"] = lunar_date.getTimePositionYinGui()
+    result["阴贵神方位描述"] = lunar_date.getTimePositionYinGuiDesc()
+    
+    # 福神
+    result["福神方位"] = lunar_date.getTimePositionFu()
+    result["福神方位描述"] = lunar_date.getTimePositionFuDesc()
+    
+    # 财神
+    result["财神方位"] = lunar_date.getTimePositionCai()
+    result["财神方位描述"] = lunar_date.getTimePositionCaiDesc()
+    
+    return result
 
 def get_yiji(input_time=None):
     # input_time格式为 "2024-11-12 10:19:00"
@@ -120,7 +253,8 @@ def get_jixiongshen(input_time=None):
     print(result_xiongsha)
     return result_jishen,result_xiongsha
 
-def get_wuxing(input_time=None,gender=1):
+def get_wuxing(bazi=None,input_time=None,gender=1):
+    # input_time可以是任何时间，可以是出生时间
     if input_time:
         target_time = datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S")
     else:
@@ -129,13 +263,15 @@ def get_wuxing(input_time=None,gender=1):
     lunar = Lunar.fromDate(target_time)
     d = lunar.getEightChar()
 
-    # 打印八字五行,八字五行，八字纳音，天干十神，地支十神，年月日时空亡
+    # 打印八字五行,八字五行，八字纳音，天干十神，地支十神，年月日时空亡，八字长生状态
     print(f"{d.getYearWuXing()}, {d.getMonthWuXing()}, {d.getDayWuXing()}, {d.getTimeWuXing()}")
     print(f"{d.getYearNaYin()}, {d.getMonthNaYin()}, {d.getDayNaYin()}, {d.getTimeNaYin()}")
     print(f"{d.getYearShiShenGan()}, {d.getMonthShiShenGan()}, {d.getDayShiShenGan()}, {d.getTimeShiShenGan()}")
     print(f"{d.getYearShiShenZhi()},{d.getMonthShiShenZhi()},{d.getDayShiShenZhi()},{d.getTimeShiShenZhi()}")
     print(f"{d.getYearXunKong()},{d.getMonthXunKong()},{d.getDayXunKong()},{d.getTimeXunKong()}")
-    
+    ######### 长生计算方法似乎有些问题，需要跟世杰老师对
+    bazi_changsheng = get_changsheng(bazi=bazi)
+    print(f"{bazi_changsheng[0]},{bazi_changsheng[1]},{bazi_changsheng[2]},{bazi_changsheng[3]}")
 
     # 获取胎元
     print("胎元：",d.getTaiYuan()," 胎元纳音:",d.getTaiXiNaYin())
@@ -155,12 +291,13 @@ def get_wuxing(input_time=None,gender=1):
     # 获取大运表
     da_yun_arr = yun.getDaYun()
     dayun_list = []
-    # 嵌套列表，每个元素中包含，每个大运的初始年，初始年纪，初始年干支，大运所在旬的空亡，大运初始年的纳音
+    # 嵌套列表，每个元素中包含，每个大运的初始年，初始年纪，初始年干支，大运所在旬的空亡，大运初始年的纳音，大运长生
     for i, da_yun in enumerate(da_yun_arr):
         if i == 0:
             continue
         xun,kongwang = get_xun(da_yun.getGanZhi())
-        dayun_list.append([da_yun.getStartYear(),da_yun.getStartAge(),da_yun.getGanZhi(),kongwang,nayin_[da_yun.getGanZhi()]])
+        dayun_changsheng = get_changsheng(bazi=bazi,dayun_data=str(da_yun.getStartYear())+","+da_yun.getGanZhi(),mark=True)[0][0]
+        dayun_list.append([da_yun.getStartYear(),da_yun.getStartAge(),da_yun.getGanZhi(),kongwang,nayin_[da_yun.getGanZhi()],dayun_changsheng])
     print(dayun_list)
 
 
@@ -175,7 +312,7 @@ def get_wuxing(input_time=None,gender=1):
 # get_chongsha("2024-11-12 10:19:00")
 # get_zhishen("2024-11-12 10:19:00")
 # get_jixiongshen(f"2022-11-13 10:19:00")
-get_wuxing(gender = 1)
+get_wuxing(bazi=[['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']],input_time = "1994-12-19 19:00:00",gender = 1)
 
 # result = {"吉神":[],"凶神":[]}
 # for j in range(1,13):

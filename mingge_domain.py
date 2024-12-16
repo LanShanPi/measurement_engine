@@ -1,5 +1,6 @@
 from qiangruo import get_qiangruo,wuxingliliang
 from guiqi import count_earthly_branch_combinations_with_scores
+from function_tools import get_yangren,get_luwei,get_zhengguan,get_zhengyin
 
 tiangan_dizhi = {
         "甲":["阳","木"],
@@ -80,165 +81,6 @@ def check_three_combinations(branches, combinations):
             if combo_set.issubset(branches):
                 result[combo_type].append((combo_set, ju))
     return result
-
-def get_biange(bazi):
-    # 井栏斜义：清奇显贵 (天干必须有三个庚，日柱必须为庚申，庚子，庚辰中的一个，地支必须三合出水局)
-    if bazi[0].count("庚") >= 3 and bazi[0][2] == "庚" and bazi[1][2] in ["申","子","辰"]:
-        # 获取地支部分
-        earthly_branches = set(bazi[1])  # 将地支部分转换为集合以便检查
-        # 检查八字中的三合和三会
-        result = check_three_combinations(earthly_branches, three_combinations)
-        if result["三合"]:
-            if result["三会"][0][1] == "水局":
-                return "井栏斜义"
-    
-    # 壬骑龙背：主大富贵 (日干必须为壬，地支中必须有辰，且地支中辰+寅的数量大于等于3，另外日柱为壬辰最优)
-    if bazi[0][2] == "壬":
-        if (bazi[1].count("辰") >= 1) and (bazi[1].count("辰")+bazi[1].count("寅") >= 3):
-            return "壬骑龙背"
-    
-    # 子遥巳禄：登科及第（日柱为甲子，时柱也必须为甲子，然后在年支或者月支必须出现巳吗）
-    if bazi[0][2] == "甲" and bazi[0][3] == "甲" and bazi[1][2] == "子" and bazi[1][3] == "子" and "巳" in bazi[1][:2]:
-        return "子遥巳禄"
-    
-    # 六阴朝阳格：稳坐朝堂（日柱为辛丑、辛卯、辛巳、辛未、辛酉、辛亥其中之一，时支为子）
-    if bazi[0][2]+bazi[1][2] in ["辛丑","辛卯","辛巳","辛未","辛酉","辛亥"] and bazi[1][3] == "子":
-        return "六阴朝阳"
-
-    # 六乙鼠贵：贵命（日干为乙，日支为子，六乙指的是表示六种不同的乙日，也就是以乙日为日干的六种组合）
-    if bazi[0][2] == "乙" and bazi[1][2] == "子":
-        return "六乙鼠贵"
-    
-    # 日禄归时：大富大贵（日干的在时支得到自己的禄位）
-    # 列表中每个元素的第一个符号为日干，第二个符号为时支
-    lu = ["甲寅","乙卯","丙巳","丁午","戊巳","己午","庚申","辛酉","壬亥","癸子"]
-    if bazi[0][2]+bazi[1][3] in lu:
-        return "日禄归时"
-    # 官星坐禄（天干中出现日干的官星，且官星所在位置的地支正好是官星的禄位）
-    # 字典中的值第一个符号为正官第二个为七杀
-    guanxingzuolu = {"甲":"辛庚","乙":"庚辛","丙":"癸壬","丁":"壬癸","戊":"乙甲","己":"甲乙","庚":"丁丙","辛":"丙丁","壬":"己戊","癸":"戊己",}
-    guanxing = guanxingzuolu[bazi[0][2]][0]
-    if guanxing in bazi[0] and guanxing+bazi[1][bazi[0].index(guanxing)] in lu:
-        return "官星坐禄"
-    
-    # 拱禄拱贵：王侯贵命（拱出的禄位不能填实，即不能出现在地支中）
-    # 每个元素前两个字是日柱，后两个字是时柱
-    gonglu = {"癸亥癸丑":"拱出子禄","癸丑癸亥":"拱出子禄","丁巳丁未":"拱出午禄","己未己巳":"拱出午禄","戊辰戊午":"拱出已禄"}
-    gonggui = {"甲申甲戌":"拱出酉中辛金为贵","乙未乙酉":"拱出申中庚金为官","甲寅甲子":"拱出丑中辛金","戊申戊午":"可拱出未中乙木","辛丑辛卯":"拱出寅中丙火"}
-    rizhushizhu = bazi[0][2]+bazi[1][2]+bazi[0][3]+bazi[1][3]
-    if rizhushizhu in list(gonglu) or rizhushizhu in list(gonggui):
-        return "拱禄拱贵"
-    
-    # 冲禄：贵命（首先计算日干所在禄位，然后计算禄位对应的六冲符号，日支必须是该六冲符号，且年，月，时支必须存在该六冲符号，且禄位必须不能存在于地支中）
-    liuchong = ["子午", "丑未","寅申","卯酉", "辰戌", "巳亥"]
-    # 计算日干所在的禄位
-    lu = {"甲":"寅","乙":"卯","丙":"巳","丁":"午","戊":"巳","己":"午","庚":"申","辛":"酉","壬":"亥","癸":"子"}
-    lu_wei = lu[bazi[0][2]]
-    # 计算禄位对应的六冲符号
-    for item in liuchong:
-        if lu_wei in item:
-            chonglu = item.replace(item,"")
-    # 计算地支中禄位对应的六冲符号是否大于2，且日支是否为禄位对应的六冲符号，且禄位符号不存在于地支中
-    chonglu_num = bazi[1].count(chonglu)
-    if lu_wei not in bazi[1] and chonglu_num >= 2 and bazi[1][2] == chonglu:
-        return "冲禄"
-        
-    # 六壬趋艮（六壬日遇到甲寅时,合出亥中壬水即有了禄）
-    # 六壬日中的地支
-    liuren = ["子","寅","辰","午","申","戌"]
-    if bazi[0][2] == "壬" and bazi[1][2] in liuren and (bazi[0][3]+bazi[1][3] == "甲寅") and "亥" not in bazi[1]:
-        return "六壬趋艮"
-    
-    # 六甲趋乾(六甲日遇见亥时)
-    # 六甲日中的地支
-    liujia = ["子","寅","辰","午","申","戌"]
-    if bazi[0][2] == "甲" and bazi[1][2] in liujia and bazi[1][3] == "亥" and "寅" not in bazi[1]:
-        return "六甲趋乾"
-    
-    # 财官双美
-    lumatongxiang = ["壬午","癸巳"]
-    if bazi[0][2]+bazi[1][2] in lumatongxiang:
-        return "财官双美"
-    
-    # 金神格
-    # 待写
-    ############################################
-    shizhu = ["癸酉","己巳","乙丑"]
-    rizhu = ["甲子","甲辰"]
-    # pass
-
-    # 魁罡格
-    kuigang = ["庚辰","庚戌","壬辰","戊戌"]
-    if bazi[0][2]+bazi[1][2] in kuigang:
-        return "魁罡格"
-    
-    # 子午双包
-    # 待写
-    ##############################################
-
-    # 八专禄旺
-    # 计算日干的五行属性
-    if tiangan_dizhi[bazi[0][2]][1] == tiangan_dizhi[bazi[1][2]][1]:
-        return "八专禄旺"
-    
-    # 干支持旺
-    conditions = [
-        (["甲", "乙"], ["亥", "卯", "未"], ["寅", "卯"]),
-        (["丙", "丁"], ["寅", "午", "戌"], ["巳", "午"]),
-        (["戊", "己"], ["巳", "午"], ["辰", "戌", "丑", "未"]),
-        (["庚", "辛"], ["巳", "酉", "丑"], ["申", "酉"]),
-        (["壬", "癸"], ["申", "子", "辰"], ["亥", "子"]),
-    ]
-    for day_stems, month_branches, time_branches in conditions:
-        if bazi[0][2] in day_stems and bazi[1][2] in month_branches and bazi[1][3] in time_branches:
-            return "干支持旺"
-    
-    # 曲直格
-    if get_quzhi_ge(bazi):
-        return "曲直格"
-    
-    # 炎上格
-    if get_yanzhang_ge(bazi):
-        return "炎上格"
-    
-    # 从革格
-    if get_congge_ge(bazi):
-        return "从革格"
-    
-    # 润下格
-    if get_runxia_ge(bazi):
-        return "润下格"
-    
-    # 稼穑格
-    if get_jiase_ge(bazi):
-        return "稼穑格"
-    
-    # 金白水清
-    if get_jinbai_shuiqing(bazi):
-        return "金白水清"
-
-    # 木火交辉
-    if get_muhuo_jiaohui(bazi):
-        return "木火交辉"
-
-    # 火金铸印
-    if get_huojin_zhuyin(bazi):
-        return "火金铸印"
-    
-    # 棣萼联芳
-    if get_die_lian_fang(bazi):
-        return "棣萼联芳"
-    
-    # 天干连珠
-    if get_tiangan_lianzhu(bazi):
-        return "天干连珠"
-    
-    # 地支连茹
-    if get_dizhi_lianru(bazi):
-        return "地支连茹"
-
-    return "不入变格"
-    
 
 def get_dizhi_lianru(bazi):
     earthly_branches = bazi[1]
@@ -646,4 +488,257 @@ def get_congge(bazi):
         return "从儿格"
     else:
         return "不入从格"
+
+
+def get_jinglanxieyige(bazi):
+    # 井栏斜义：清奇显贵 (天干必须有三个庚，日柱必须为庚申，庚子，庚辰中的一个，地支必须三合出水局)
+    if bazi[0].count("庚") >= 3 and bazi[0][2] == "庚" and bazi[1][2] in ["申","子","辰"]:
+        # 获取地支部分
+        earthly_branches = set(bazi[1])  # 将地支部分转换为集合以便检查
+        # 检查八字中的三合和三会
+        result = check_three_combinations(earthly_branches, three_combinations)
+        if result["三合"]:
+            if result["三会"][0][1] == "水局":
+                return True
+    return False
+
+def get_renqilongbeige(bazi):
+    # 壬骑龙背：主大富贵 (日干必须为壬，地支中必须有辰，且地支中辰+寅的数量大于等于3，另外日柱为壬辰最优)
+    if bazi[0][2] == "壬":
+        if (bazi[1].count("辰") >= 1) and (bazi[1].count("辰")+bazi[1].count("寅") >= 3):
+            return True
+    return False
+
+def get_ziyaosiluge(bazi):
+    # 子遥巳禄：登科及第（日柱为甲子，时柱也必须为甲子，然后在年支或者月支必须出现巳吗）
+    if bazi[0][2] == "甲" and bazi[0][3] == "甲" and bazi[1][2] == "子" and bazi[1][3] == "子" and "巳" in bazi[1][:2]:
+        return True
+    return False
+
+def get_liuyinchaoyangge(bazi):
+    # 六阴朝阳格：稳坐朝堂（日柱为辛丑、辛卯、辛巳、辛未、辛酉、辛亥其中之一，时支为子）
+    if bazi[0][2]+bazi[1][2] in ["辛丑","辛卯","辛巳","辛未","辛酉","辛亥"] and bazi[1][3] == "子":
+        return True
+    return False
+
+def get_liuyishuguige(bazi):
+    # 六乙鼠贵：贵命（日干为乙，日支为子，六乙指的是表示六种不同的乙日，也就是以乙日为日干的六种组合）
+    if bazi[0][2] == "乙" and bazi[1][2] == "子":
+        return True
+    return False
+
+def get_riluguishige(bazi):
+    # 日禄归时：大富大贵（日干的在时支得到自己的禄位）
+    # 列表中每个元素的第一个符号为日干，第二个符号为时支
+    lu = ["甲寅","乙卯","丙巳","丁午","戊巳","己午","庚申","辛酉","壬亥","癸子"]
+    if bazi[0][2]+bazi[1][3] in lu:
+        return True
+    return False
+
+def get_guanxingzuoluge(bazi):
+    lu = ["甲寅","乙卯","丙巳","丁午","戊巳","己午","庚申","辛酉","壬亥","癸子"]
+    # 官星坐禄（天干中出现日干的官星，且官星所在位置的地支正好是官星的禄位）
+    # 字典中的值第一个符号为正官第二个为七杀
+    guanxingzuolu = {"甲":"辛庚","乙":"庚辛","丙":"癸壬","丁":"壬癸","戊":"乙甲","己":"甲乙","庚":"丁丙","辛":"丙丁","壬":"己戊","癸":"戊己",}
+    guanxing = guanxingzuolu[bazi[0][2]][0]
+    if guanxing in bazi[0] and guanxing+bazi[1][bazi[0].index(guanxing)] in lu:
+        return True
+    return False
+
+def get_gonglugongguige(bazi):
+    # 拱禄拱贵：王侯贵命（拱出的禄位不能填实，即不能出现在地支中）
+    # 每个元素前两个字是日柱，后两个字是时柱
+    gonglu = {"癸亥癸丑":"拱出子禄","癸丑癸亥":"拱出子禄","丁巳丁未":"拱出午禄","己未己巳":"拱出午禄","戊辰戊午":"拱出已禄"}
+    gonggui = {"甲申甲戌":"拱出酉中辛金为贵","乙未乙酉":"拱出申中庚金为官","甲寅甲子":"拱出丑中辛金","戊申戊午":"可拱出未中乙木","辛丑辛卯":"拱出寅中丙火"}
+    rizhushizhu = bazi[0][2]+bazi[1][2]+bazi[0][3]+bazi[1][3]
+    if rizhushizhu in list(gonglu) or rizhushizhu in list(gonggui):
+        return True
+    return False
+
+def get_chongluge(bazi):
+    # 冲禄：贵命（首先计算日干所在禄位，然后计算禄位对应的六冲符号，日支必须是该六冲符号，且年，月，时支必须存在该六冲符号，且禄位必须不能存在于地支中）
+    liuchong = ["子午", "丑未","寅申","卯酉", "辰戌", "巳亥"]
+    # 计算日干所在的禄位
+    lu = {"甲":"寅","乙":"卯","丙":"巳","丁":"午","戊":"巳","己":"午","庚":"申","辛":"酉","壬":"亥","癸":"子"}
+    lu_wei = lu[bazi[0][2]]
+    # 计算禄位对应的六冲符号
+    for item in liuchong:
+        if lu_wei in item:
+            chonglu = item.replace(item,"")
+    # 计算地支中禄位对应的六冲符号是否大于2，且日支是否为禄位对应的六冲符号，且禄位符号不存在于地支中
+    chonglu_num = bazi[1].count(chonglu)
+    if lu_wei not in bazi[1] and chonglu_num >= 2 and bazi[1][2] == chonglu:
+        return True
+    return False
+
+def get_liurenqugenge(bazi):
+    # 六壬趋艮（六壬日遇到甲寅时,合出亥中壬水即有了禄）
+    # 六壬日中的地支
+    liuren = ["子","寅","辰","午","申","戌"]
+    if bazi[0][2] == "壬" and bazi[1][2] in liuren and (bazi[0][3]+bazi[1][3] == "甲寅") and "亥" not in bazi[1]:
+        return True
+    return False
+
+def get_liujiaquqiange(bazi):
+    # 六甲趋乾(六甲日遇见亥时)
+    # 六甲日中的地支
+    liujia = ["子","寅","辰","午","申","戌"]
+    if bazi[0][2] == "甲" and bazi[1][2] in liujia and bazi[1][3] == "亥" and "寅" not in bazi[1]:
+        return True
+    return False
+
+def get_caiguanshuangmeige(bazi):
+    # 财官双美
+    lumatongxiang = ["壬午","癸巳"]
+    if bazi[0][2]+bazi[1][2] in lumatongxiang:
+        return True
+    return False
+
+def get_jinshenge(bazi):
+    # 金神格
+    shizhu = ["癸酉","己巳","乙丑"]
+    rigan = ["甲","己"]
+    rizhu = ["甲子","甲辰"]
+    if bazi[0][3]+bazi[1][3] in shizhu and bazi[0][2] in rigan:
+        return True
+    return False
+
+def get_kuigangge(bazi):
+    # 魁罡格
+    kuigang = ["庚辰","庚戌","壬辰","戊戌"]
+    if bazi[0][2]+bazi[1][2] in kuigang:
+        return True
+    return False
+
+def get_ziwushuangbaoge(bazi):
+    # 子午双包
+    dizhi_str = "".join(bazi[1])
+    if "子午子" in dizhi_str or "午子午" in dizhi_str:
+        if get_yangren(bazi) and get_luwei(bazi) and get_zhengguan(bazi) and get_zhengyin(bazi):
+            return True
+    return False
+
+def get_bazhuanwangluge(bazi):
+    # 八专禄旺
+    # 计算日干的五行属性
+    if tiangan_dizhi[bazi[0][2]][1] == tiangan_dizhi[bazi[1][2]][1]:
+        return True
+    return False
+
+def get_ganzhichiwangge(bazi):
+    # 干支持旺
+    conditions = [
+        (["甲", "乙"], ["亥", "卯", "未"], ["寅", "卯"]),
+        (["丙", "丁"], ["寅", "午", "戌"], ["巳", "午"]),
+        (["戊", "己"], ["巳", "午"], ["辰", "戌", "丑", "未"]),
+        (["庚", "辛"], ["巳", "酉", "丑"], ["申", "酉"]),
+        (["壬", "癸"], ["申", "子", "辰"], ["亥", "子"]),
+    ]
+    for day_stems, month_branches, time_branches in conditions:
+        if bazi[0][2] in day_stems and bazi[1][2] in month_branches and bazi[1][3] in time_branches:
+            return True
+    return False
+
+def get_biange(bazi):
+    if get_jinglanxieyige(bazi):
+        return "井栏斜仪"
+    
+    if get_renqilongbeige(bazi):
+        return "壬骑龙背"
+    
+    if get_ziyaosiluge(bazi):
+        return "子遥巳禄"
+    
+    if get_liuyinchaoyangge(bazi):
+        return "六阴朝阳"
+    
+    if get_liuyishuguige(bazi):
+        return "六乙鼠贵"
+    
+    if get_riluguishige(bazi):
+        return "日禄归时"
+    
+    if get_guanxingzuoluge(bazi):
+        return "官星坐禄"
+    
+    if get_gonglugongguige(bazi):
+        return "拱禄拱贵"
+    
+    if get_chongluge(bazi):
+        return "冲禄"
+    
+    if get_liurenqugenge(bazi):
+        return "六壬趋艮"
+    
+    if get_liujiaquqiange(bazi):
+        return "六甲趋乾"
+    
+    if get_caiguanshuangmeige(bazi):
+        return "财官双美"
+    
+    if get_jinshenge(bazi):
+        return "金神格"
+    
+    if get_kuigangge(bazi):
+        return "魁罡格"
+
+    if get_ziwushuangbaoge(bazi):
+        return "子午双包"
+    
+    if get_bazhuanwangluge(bazi):
+        return "八专禄旺"
+    
+    if get_ganzhichiwangge(bazi):
+        return "干支持旺"
+    
+    # 曲直格
+    if get_quzhi_ge(bazi):
+        return "曲直格"
+    
+    # 炎上格
+    if get_yanzhang_ge(bazi):
+        return "炎上格"
+    
+    # 从革格
+    if get_congge_ge(bazi):
+        return "从革格"
+    
+    # 润下格
+    if get_runxia_ge(bazi):
+        return "润下格"
+    
+    # 稼穑格
+    if get_jiase_ge(bazi):
+        return "稼穑格"
+    
+    # 金白水清
+    if get_jinbai_shuiqing(bazi):
+        return "金白水清"
+
+    # 木火交辉
+    if get_muhuo_jiaohui(bazi):
+        return "木火交辉"
+
+    # 火金铸印
+    if get_huojin_zhuyin(bazi):
+        return "火金铸印"
+    
+    # 棣萼联芳
+    if get_die_lian_fang(bazi):
+        return "棣萼联芳"
+    
+    # 天干连珠
+    if get_tiangan_lianzhu(bazi):
+        return "天干连珠"
+    
+    # 地支连茹
+    if get_dizhi_lianru(bazi):
+        return "地支连茹"
+
+    return "不入变格"
+    
+
+
+
+
     

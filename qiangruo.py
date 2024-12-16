@@ -199,7 +199,7 @@ def get_shengfukexie(bazi):
         bazi_wuxing.append(item[::])
     return bazi_wuxing
 
-def get_yueling_wangxiangxiuqiusi(yueling,rizhu_wuxing):
+def get_bazi_yueling_wangxiangxiuqiusi(yueling,rizhu_wuxing):
     wxxqs = {
         "寅卯":{"木":1,"火":0.8,"水":0.6,"金":0.8,"土":1},
         "巳午":{"火":1,"土":0.8,"木":0.6,"水":0.8,"金":1},
@@ -207,19 +207,28 @@ def get_yueling_wangxiangxiuqiusi(yueling,rizhu_wuxing):
         "亥子":{"水":1,"木":0.8,"金":0.6,"土":0.8,"火":1},
         "辰未戌丑":{"土":1,"金":0.8,"火":0.6,"木":0.8,"水":1}
     }
+    # wxxqs = {
+    #     "寅卯":{"木":1,"火":0.8,"水":0.6,"金":0.4,"土":0.2},
+    #     "巳午":{"火":1,"土":0.8,"木":0.6,"水":0.4,"金":0.2},
+    #     "申酉":{"金":1,"水":0.8,"土":0.6,"火":0.4,"木":0.2},
+    #     "亥子":{"水":1,"木":0.8,"金":0.6,"土":0.4,"火":0.2},
+    #     "辰未戌丑":{"土":1,"金":0.8,"火":0.6,"木":0.4,"水":0.2}
+    # }
     for item in wxxqs.keys():
         if yueling in item:
             # print(f"月令为:{yueling},日柱五行为：{rizhu_wuxing},月令分为：{wxxqs[item][rizhu_wuxing]*50}")
             return wxxqs[item][rizhu_wuxing]*50
 
             
-def get_yueling_score(bazi):
-    rizhu = bazi[0][2]
+def get_yueling_score(wuxing_score,bazi):
+    # 计算八字所有符号在月令上的得分
     yueling = bazi[1][1]
-    rizhu_wuxing = tiangan_dizhi[rizhu][1]
-    yueling_wuxing = tiangan_dizhi[yueling][1]
-    yueling_score = get_yueling_wangxiangxiuqiusi(yueling,rizhu_wuxing)
-    return yueling_wuxing,yueling_score
+    # for i in range(len(bazi)):
+    #     for j in range(len(bazi[i])):
+    #         wuxing_score[tiangan_dizhi[bazi[i][j]][1]] += get_bazi_yueling_wangxiangxiuqiusi(yueling,tiangan_dizhi[bazi[i][j]][1])
+    
+    wuxing_score[tiangan_dizhi[yueling][1]] = get_bazi_yueling_wangxiangxiuqiusi(yueling,tiangan_dizhi[bazi[0][2]][1])
+    return wuxing_score
 
 def get_bazi_score(wuxing_score,bazi,tiangan_dizhi):
     # 计算八字位置所得分数,只需要计算天干即可，因为地支通过藏干来算
@@ -250,9 +259,9 @@ def get_bazi_score(wuxing_score,bazi,tiangan_dizhi):
         dizhicanggan.append(canggan[bazi[1][i]])
     # 计算藏干得分
     for i in range(len(dizhicanggan)):
-        # if i == 1:
-        #     # 月令的藏干需要计算######################
-        #     continue
+        if i == 1:
+            # 月令的藏干需要计算######################
+            continue
         if len(dizhicanggan[i]) == 1:
             wuxing_score[tiangan_dizhi[dizhicanggan[i]][1]] += list(bazi_wuxing[1][i].values())[0][3]
         elif len(dizhicanggan[i]) == 2:
@@ -275,6 +284,11 @@ def get_bazi_score(wuxing_score,bazi,tiangan_dizhi):
                     # print(f"藏干：{tiangan_dizhi[item][1]},得分{list(bazi_wuxing[1][i].values())[0][3]*0.10}")
                     wuxing_score[tiangan_dizhi[item][1]] += list(bazi_wuxing[1][i].values())[0][3]*0.05
     return wuxing_score,dizhicanggan
+
+
+
+    
+
 
 def get_hehua_score(wuxing_score,bazi):
     yueling = bazi[1][1]
@@ -402,8 +416,8 @@ def wuxingliliang(bazi):
                 "土":0,
                         }
         # 计算月令五行得分
-        yueling_wuxing,yueling_score = get_yueling_score(bazi)
-        wuxing_score[yueling_wuxing] += yueling_score
+        wuxing_score = get_yueling_score(wuxing_score,bazi)
+        print(wuxing_score)
         # 计算八字五行力量
         wuxing_score,dizhicanggan = get_bazi_score(wuxing_score,bazi,tiangan_dizhi)
         # 计算合化力量
@@ -420,7 +434,7 @@ def wuxingliliang(bazi):
 
 
 
-# bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
+bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
 # bazi = [ ['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
 # bazi = [["庚","癸","庚","丙"],["午","未","辰","子"]]
 # bazi = [["癸","壬","甲","甲"],["酉","戌","子","子"]]   #########################
@@ -431,6 +445,16 @@ def wuxingliliang(bazi):
 # bazi = [["乙","己","辛","庚"],["丑","丑","酉","寅"]]
 # bazi = [["癸","甲","丙","壬"],["亥","寅","子","辰"]]
 # bazi = [['庚', '壬', '丙', '庚'],['戌', '子', '辰', '申']]
+# bazi = [["戊","丁","己","癸"],["辰","巳","巳","酉"]]
+# bazi = [["辛","庚","戊","丁"],["巳","寅","午","巳"]]
+# bazi = [["辛","壬","戊","丁"],["巳","辰","午","巳"]]
+# bazi = [["丁","乙","丙","己"],["丑","巳","子","丑"]]
+
+# bazi = [["丁","癸","癸","甲"],["卯","丑","未","寅"]]
+
+# bazi = [["丙","己","丙","乙"],["子","亥","子","未"]]
+
+# # bazi = [["丙","癸","丙","戊"],["子","巳","午","戌"]]
 # bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
 # print("八字：",bazi)
 # print(bazi_sfzk)

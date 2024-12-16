@@ -161,7 +161,7 @@ def get_struction(bazi):
         rel1, score1 = check_relationship(branch1, all_relationships)
         rel2, score2 = check_relationship(branch2, all_relationships)
         # 判断是否符合“冲合对消”或“半三刑半三合”条件(有结构且能对消)
-        if (rel1 and rel2) and (rel2 == rule1[rel1]):
+        if (rel1 and rel2) and (rel1 in list(rule1.keys()) and rel2 in list(rule1.keys()) ) and (rel2 == rule1[rel1]):
             num1[0] = num1[0] + 1
             print(f"对消组合: {pos1} 和 {pos2} -> 元素 {branch1} ({rel1}), {branch2} ({rel2})")
         # 有结构，但是不能对消
@@ -231,6 +231,11 @@ def guiqi_level(bazi):
 # bazi = [["乙","己","辛","庚"],["丑","丑","酉","寅"]]
 # bazi = [["癸","甲","丙","壬"],["亥","寅","子","辰"]]
 # bazi = [['丙', '甲', '丙', '甲'], ['子', '午', '子', '丑']]
+# bazi = [["戊","丁","己","癸"],["辰","巳","巳","酉"]]
+# bazi = [["丁","乙","丙","己"],["丑","巳","子","丑"]]
+# bazi = [["丁","癸","癸","甲"],["卯","丑","未","寅"]]
+# bazi = [["丙","己","丙","乙"],["子","亥","子","未"]]
+# # bazi = [["丙","癸","丙","戊"],["子","巳","午","戌"]]
 # print(guiqi_level(bazi))
 
 # 2/3统一成0.66
