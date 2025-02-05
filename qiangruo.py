@@ -361,6 +361,30 @@ def get_hehua_score(wuxing_score,bazi):
     return wuxing_score,xchhp
 
 
+def wuxingliliang(bazi):
+        wuxing_score = {
+                "金":0,
+                "木":0,
+                "水":0,
+                "火":0,
+                "土":0,
+                        }
+        # 计算月令五行得分
+        wuxing_score = get_yueling_score(wuxing_score,bazi)
+        # 计算八字五行力量
+        wuxing_score,dizhicanggan = get_bazi_score(wuxing_score,bazi,tiangan_dizhi)
+        # 计算合化力量
+        wuxing_score,xchhp = get_hehua_score(wuxing_score,bazi)
+        # 计算总和
+        total = sum(wuxing_score.values())
+        # 计算占比
+        percentage_data = {k: (v / total) * 100 for k, v in wuxing_score.items()}
+        wuxing_scale = {k: str(round(v, 3))+"%" for k, v in percentage_data.items()}
+        # 计算日元的生扶克泄
+        bazi_wuxing = tiangan_dizhi[bazi[0][2]][1]
+        bazi_sfzk = compute_bazisfkx(bazi_wuxing)
+        return bazi_sfzk,wuxing_scale,wuxing_score
+
 def get_qiangruo(bazi):
     bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
     shengfu = bazi_sfzk["生扶"].split("，")
@@ -407,34 +431,11 @@ def get_qiangruo(bazi):
         return "极致强"
 
 
-def wuxingliliang(bazi):
-        wuxing_score = {
-                "金":0,
-                "木":0,
-                "水":0,
-                "火":0,
-                "土":0,
-                        }
-        # 计算月令五行得分
-        wuxing_score = get_yueling_score(wuxing_score,bazi)
-        print(wuxing_score)
-        # 计算八字五行力量
-        wuxing_score,dizhicanggan = get_bazi_score(wuxing_score,bazi,tiangan_dizhi)
-        # 计算合化力量
-        wuxing_score,xchhp = get_hehua_score(wuxing_score,bazi)
-        # 计算总和
-        total = sum(wuxing_score.values())
-        # 计算占比
-        percentage_data = {k: (v / total) * 100 for k, v in wuxing_score.items()}
-        wuxing_scale = {k: str(round(v, 3))+"%" for k, v in percentage_data.items()}
-        # 计算日元的生扶克泄
-        bazi_wuxing = tiangan_dizhi[bazi[0][2]][1]
-        bazi_sfzk = compute_bazisfkx(bazi_wuxing)
-        return bazi_sfzk,wuxing_scale,wuxing_score
 
 
 
-bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
+
+# bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
 # bazi = [ ['丙', '庚', '癸', '戊'],['子', '寅', '酉', '午']]
 # bazi = [["庚","癸","庚","丙"],["午","未","辰","子"]]
 # bazi = [["癸","壬","甲","甲"],["酉","戌","子","子"]]   #########################
@@ -454,12 +455,4 @@ bazi = [['甲', '丙', '己', '甲'],['戌', '子', '卯', '戌']]
 
 # bazi = [["丙","己","丙","乙"],["子","亥","子","未"]]
 
-# # bazi = [["丙","癸","丙","戊"],["子","巳","午","戌"]]
-# bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
-# print("八字：",bazi)
-# print(bazi_sfzk)
-# print("五行占比：",wuxing_scale)
-# print("五行得分：",wuxing_score)
-# # 计算身强身弱
-# qiangruo = get_qiangruo(bazi)
-# print("强弱：",qiangruo)
+

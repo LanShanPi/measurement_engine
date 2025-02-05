@@ -98,13 +98,13 @@ def get_guiqi(lv,score):
     #     return "辉煌"
 
     if score <= -3 or score >= 3 or (score >= -0.3 and score <= 0.3):
-        name = "皇极至尊"
+        name = "九天御极"
     elif (score > -3 and score <= -2.1) or (score > 2.1 and score < 3):
-        name = "传奇卓越"
+        name = "紫微帝曜"
     elif (score > -2.1 and score <= -1.2) or (score > 1.2 and score <= 2.1):
-        name = "天命贵胄"
+        name = "天璇贵胄"
     elif (score > -1.2 and score < -0.3) or (score > 0.3 and score <= 1.2):
-        name = "最强王者"
+        name = "翊辰显贵"
     
     if lv == "lv-1":
         return "帝皇之贵"+"-"+name
@@ -163,11 +163,11 @@ def get_struction(bazi):
         # 判断是否符合“冲合对消”或“半三刑半三合”条件(有结构且能对消)
         if (rel1 and rel2) and (rel1 in list(rule1.keys()) and rel2 in list(rule1.keys()) ) and (rel2 == rule1[rel1]):
             num1[0] = num1[0] + 1
-            print(f"对消组合: {pos1} 和 {pos2} -> 元素 {branch1} ({rel1}), {branch2} ({rel2})")
+            # print(f"对消组合: {pos1} 和 {pos2} -> 元素 {branch1} ({rel1}), {branch2} ({rel2})")
         # 有结构，但是不能对消
         elif (rel1 and rel2) and (rel2 not in rule2[rel1]):
             num2[0] = num2[0] + 1
-            print(f"不对消组合: {pos1} 和 {pos2} -> 元素 {branch1} ({rel1}), {branch2} ({rel2})")
+            # print(f"不对消组合: {pos1} 和 {pos2} -> 元素 {branch1} ({rel1}), {branch2} ({rel2})")
         
     return num1[0],num2[0]
 
@@ -184,7 +184,7 @@ def guiqi_level(bazi):
     for (category, comb, subset), score in counts.items():
         comb_str = ''.join(comb)  # 组合的字符串表示
         subset_str = ', '.join(str(i) for i in subset)  # 位置的字符串表示
-        print(f"地支中有 {category}：{comb_str} 的组合，位置为：{subset_str}，总分为：{score:.2f}")
+        # print(f"地支中有 {category}：{comb_str} 的组合，位置为：{subset_str}，总分为：{score:.2f}")
         # 根据类别分配得分到不同组
         if category in ["六冲", "三刑", "半三刑", "自刑", "害", "破"]:
             group1_score += -score
@@ -193,25 +193,25 @@ def guiqi_level(bazi):
     # 保留两位小数，四舍五入
     group1_score = round(group1_score,2)
     group2_score = round(group2_score,2)
-    print(f"八字地支中【六冲，三刑，半三刑，自刑，害，破】加和的得分为：{group1_score}")
-    print(f"八字地支中【六合，半三合、拱合】加和的得分为：{group2_score}")
+    # print(f"八字地支中【六冲，三刑，半三刑，自刑，害，破】加和的得分为：{group1_score}")
+    # print(f"八字地支中【六合，半三合、拱合】加和的得分为：{group2_score}")
     total_score = group1_score + group2_score
-    print(f"总分为{total_score}")
+    # print(f"总分为{total_score}")
     # 然后判断是属于那个等级,num1表示有结构且对消的组合对数，num2表示有结构但是不对消的组合对数
     num1,num2 = get_struction(bazi)
     # 等级1
     if num1 != 0:
-        print(f"地支中存在<{num1}>个对消组合，则总分数要除以：{2**num1}")
+        # print(f"地支中存在<{num1}>个对消组合，则总分数要除以：{2**num1}")
         total_score /= (2**num1)
-        print(f"修正后的总分为{total_score}")
+        # print(f"修正后的总分为{total_score}")
         name = get_guiqi("lv-1",total_score)
         return "lv-1",total_score,name
     
     # 等级2
     if num2 != 0:
-        print(f"地支中存在<{num2}>个对消组合，则总分数要除以：{2**num2}")
+        # print(f"地支中存在<{num2}>个对消组合，则总分数要除以：{2**num2}")
         total_score /= (2**num2)
-        print(f"修正后的总分为{total_score}")
+        # print(f"修正后的总分为{total_score}")
         name = get_guiqi("lv-2",total_score)
         return "lv-2",total_score,name
     

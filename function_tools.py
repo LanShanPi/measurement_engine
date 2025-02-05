@@ -1,8 +1,13 @@
 from lunar_python import Lunar,EightChar
 from datetime import datetime 
+from zhdate import ZhDate as lunar_date
+import re
+import cnlunar
+from jieqi import ershisijieqi_v1
+from lunar_python import Lunar, Solar
 
 import json
-def get_changsheng(bazi, dayun_data=None,arg3=None,mark=False ):
+def get_changsheng(bazi=None, dayun_data=None ):
     """
     计算八字和大运的长生状态。
     arg3:目标时间的四柱信息
@@ -22,15 +27,15 @@ def get_changsheng(bazi, dayun_data=None,arg3=None,mark=False ):
     # 十二长生状态与地支的对应关系
     longsheng_table = {
         '甲': ['亥', '子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌'],
-        '乙': ['午', '巳', '辰', '卯', '寅', '丑', '子', '亥', '戌', '酉', '申', '未'],
         '丙': ['寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑'],
-        '丁': ['寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑'],
         '戊': ['寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑'],
-        '己': ['午', '巳', '辰', '卯', '寅', '丑', '子', '亥', '戌', '酉', '申', '未'],
-        '庚': ['子', '亥', '戌', '酉', '申', '未', '午', '巳', '辰', '卯', '寅', '丑'],
-        '辛': ['亥', '戌', '酉', '申', '未', '午', '巳', '辰', '卯', '寅', '丑', '子'],
-        '壬': ['寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑'],
-        '癸': ['卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑', '寅']
+        '庚': ['巳', '午', '未', '申', '酉', '戌', '亥', '子', '丑', '寅', '卯', '辰'],
+        '壬': ['申', '酉', '戌', '亥', '子', '丑', '寅', '卯', '辰', '巳', '午', '未'],
+        '癸': ['卯', '寅', '丑', '子', '亥', '戌', '酉', '申', '未', '午', '巳', '辰'],
+        '乙': ['午', '巳', '辰', '卯', '寅', '丑', '子', '亥', '戌', '酉', '申', '未'],
+        '丁': ['酉', '申', '未', '午', '巳', '辰', '卯', '寅', '丑', '子', '亥', '戌'],
+        '己': ['酉', '申', '未', '午', '巳', '辰', '卯', '寅', '丑', '子', '亥', '戌'],
+        '辛': ['子', '亥', '戌', '酉', '申', '未', '午', '巳', '辰', '卯', '寅', '丑'],
     }
 
     # 十二长生状态名称
@@ -58,13 +63,9 @@ def get_changsheng(bazi, dayun_data=None,arg3=None,mark=False ):
     # 另一种是列表形势，如：["2024,甲辰","2025,乙巳"...]
     # dayun_changsheng返回格式统一为:["胎","养"...]
     dayun_changsheng = []
-    if dayun_data:
-        if isinstance(dayun_data, str):
-            dayun_changsheng.append(get_longsheng_state(day_gan,dayun_data.split(",")[1][-1]))
-        else:
-            for item in dayun_data:
-                dayun_changsheng.append(get_longsheng_state(day_gan,item.split(",")[1][-1]))
-
+    for i in range(2,len(dayun_data)):
+        dayun_changsheng.append(get_longsheng_state(day_gan,dayun_data[i][2][-1]))
+    
     #'time_year_changsheng': get_longsheng_state(day_gan, time_year_zhi),
     # 'time_month_changsheng': get_longsheng_state(day_gan, time_month_zhi),
     # 'time_day_changsheng': get_longsheng_state(day_gan, time_day_zhi),
@@ -73,17 +74,12 @@ def get_changsheng(bazi, dayun_data=None,arg3=None,mark=False ):
     # 计算长生状态
     # result存储的长生状态顺序为[八字年，八字月，八字日，八字时，大运]
     result = []
-    if bazi and not mark:
-        # 只计算八字长生
-        result.append(get_longsheng_state(day_gan, bazi_year_zhi)),
-        result.append(get_longsheng_state(day_gan, bazi_month_zhi))
-        result.append(get_longsheng_state(day_gan, bazi_day_zhi))
-        result.append(get_longsheng_state(day_gan, bazi_hour_zhi))
-        return result
-    elif mark:
-        # 只计算大运长生
-        result.append(dayun_changsheng)
-        return result
+    result.append(get_longsheng_state(day_gan, bazi_year_zhi)),
+    result.append(get_longsheng_state(day_gan, bazi_month_zhi))
+    result.append(get_longsheng_state(day_gan, bazi_day_zhi))
+    result.append(get_longsheng_state(day_gan, bazi_hour_zhi))
+    result.append(dayun_changsheng)
+    return result
 
 
 def get_mingzhu_shishen(bazi):
@@ -183,16 +179,16 @@ def get_mingzhu_shishen(bazi):
             result[shishenguize[fuhao][day_gan_data[0]+data_item[1]]].append(data_item[0])
     
     return {
-        "bijian":",".join(result["比肩"]),
-        "bijie":",".join(result["比劫"]),
-        "pianyin":",".join(result["偏印"]),
-        "zhengyin":",".join(result["正印"]),
-        "piancai":",".join(result["偏财"]),
-        "zhengcai":",".join(result["正财"]),
-        "qisha":",".join(result["七杀"]),
-        "zhengguan":",".join(result["正官"]),
-        "shishen":",".join(result["食神"]),
-        "shangguan":",".join(result["伤官"])
+        "比肩":",".join(result["比肩"]),
+        "比劫":",".join(result["比劫"]),
+        "偏印":",".join(result["偏印"]),
+        "正印":",".join(result["正印"]),
+        "偏财":",".join(result["偏财"]),
+        "正财":",".join(result["正财"]),
+        "七杀":",".join(result["七杀"]),
+        "正官":",".join(result["正官"]),
+        "食神":",".join(result["食神"]),
+        "伤官":",".join(result["伤官"])
     }
 
 def get_xun(ganzhi="甲辰"):
@@ -219,10 +215,19 @@ def get_xun(ganzhi="甲辰"):
     kongwang = kongwang1+kongwang2
     return chushi_xun,kongwang
 
-def get_liunian(input_time):
+def get_liunian(input_time=None):
+    # 默认输入是农历
     # 可以以input_time为中心算出前后十年的流年
     # input_time格式为 "2024-11-12 10:19:00"，为str格式
     # 以甲辰年为锚点
+
+    if input_time:
+        target_time = str(datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S"))
+    else:
+        target_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # 转成农历
+        target_time = convert_yangli_to_nongli(target_time)
+
     base_nian = 2024
     base_niangan = "甲"
     base_nianzhi = "辰"
@@ -231,7 +236,7 @@ def get_liunian(input_time):
     dizhi = ["子", "丑", "寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥"]
     shengxiao = ["鼠", "牛", "虎", "兔", "龙", "蛇", "马", "羊", "猴", "鸡", "狗", "猪"]
 
-    target_nian = int(input_time.split("-")[0])
+    target_nian = int(target_time.split("-")[0])
     if target_nian >= base_nian:
         forward_steps = target_nian-base_nian
         target_niangan = tiangan[(tiangan.index(base_niangan)+forward_steps)%10]
@@ -250,33 +255,31 @@ def get_liunian(input_time):
         target_shengxiao = shengxiao[(shengxiao.index(base_shengxiao)+nianzhi_forward_steps)%12]
         return target_niangan+target_nianzhi,target_shengxiao
 
-def get_liuyue(input_time):
+def get_liuyue(input_time=None):
+    print(input_time)
+    # 默认输入是农历
     # input_time格式为 "2024-11-12 10:19:00"，为str格式
-    yuezhu_chaxun = {
-    "甲己": ["丙寅", "丁卯", "戊辰", "己巳", "庚午", "辛未", "壬申", "癸酉", "甲戌", "乙亥", "丙子", "丁丑"],
-    "乙庚": ["戊寅", "己卯", "庚辰", "辛巳", "壬午", "癸未", "甲申", "乙酉", "丙戌", "丁亥", "戊子", "己丑"],
-    "丙辛": ["己寅", "庚卯", "辛辰", "壬巳", "癸午", "甲未", "乙申", "丙酉", "丁戌", "戊亥", "己子", "庚丑"],
-    "丁壬": ["庚寅", "辛卯", "壬辰", "癸巳", "甲午", "乙未", "丙申", "丁酉", "戊戌", "己亥", "庚子", "辛丑"],
-    "戊癸": ["甲寅", "乙卯", "丙辰", "丁巳", "戊午", "己未", "庚申", "辛酉", "壬戌", "癸亥", "甲子", "乙丑"]
-}
-
-    liunian,_ = get_liunian(input_time)
-    for item in list(yuezhu_chaxun.keys()):
-        if liunian[0] in item:
-            print(yuezhu_chaxun[item])
-            return yuezhu_chaxun[item]
-
+    if input_time:
+        # datetime型
+        target_time = str(datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S"))
+    else:
+        # 字符串型，获取的时间是阳历，要转成农历
+        target_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # 转成农历
+        target_time = convert_yangli_to_nongli(target_time)
+    
+    
 
 def get_liuri_liushi(input_time=None):
-    from lunar_python import Lunar,EightChar
-    from lunar_python.util import HolidayUtil
-    from datetime import datetime 
-
+    # 默认输入是农历
     if input_time:
-        target_time = datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S")
+        target_time = str(datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S"))
     else:
-        target_time = datetime.now()
-    lunar = Lunar.fromDate(datetime.now())
+        # 获取的是阳历时间
+        target_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # 转成农历
+        target_time = convert_yangli_to_nongli(target_time)
+    lunar = Lunar.fromDate(datetime.strptime(target_time, '%Y-%m-%d %H:%M:%S'))
     d = lunar.getEightChar()
     return d.toString().split(" ")[2:]
 
@@ -331,4 +334,275 @@ def get_zhengyin(bazi):
             return True
     return False
 
+def convert_yangli_to_nongli(input_time):
+    # 农历转阳历
+    dt_date = datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S")
+    date = str(lunar_date.from_datetime(dt_date)) # 农历2020年7月7日 , 从阳历日期转换成农历日期
+    # 正则表达式提取年份、月份和日期
+    pattern = r"农历(\d{4})年(\d{1,2})月(\d{1,2})日"
 
+    match = re.search(pattern, date)
+    if match:
+        year = match.group(1)
+        month = match.group(2)
+        day = match.group(3)
+        return year+"-"+month+"-"+day+" "+input_time.split(" ")[1]
+
+def convert_nongli_to_yangli(input_time):
+    #农历转阳历
+    year = int(input_time.split(" ")[0].split("-")[0])
+    month = int(input_time.split(" ")[0].split("-")[1])
+    day = int(input_time.split(" ")[0].split("-")[2])
+    date = lunar_date(year,month,day) 
+    # 字符串类型
+    date = str(date.to_datetime()).split(" ")[0]+" "+input_time.split(" ")[1]
+    return date
+
+def get_bazi(input_time,mark=True):
+    # 获取用户八字
+    # mark标记是否为农历，若为False则不是农历，否则为农历,默认为True，即农历
+    if mark:
+        # 转阳历
+        input_time = convert_nongli_to_yangli(input_time)
+    # print(input_time)
+    # 需要把日期转成阳历进行计算
+    date = cnlunar.Lunar(datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S"), godType='8char')  # 常规算法
+    nianzhu = date.year8Char
+    yuezhu = date.month8Char
+    rizhu = date.day8Char
+    shizhu = date.twohour8Char
+    bazi = []
+    bazi.append([nianzhu[0],yuezhu[0],rizhu[0],shizhu[0]])
+    bazi.append([nianzhu[1],yuezhu[1],rizhu[1],shizhu[1]])
+    return bazi
+
+def get_time_dif(time_str1,time_str2):######################
+    print(time_str1,time_str2)
+
+    # 定义时间格式
+    time_format = '%Y-%m-%d %H:%M:%S.%f'
+
+    # 将时间字符串转换为 datetime 对象
+    time_obj1 = datetime.strptime(time_str1, '%Y-%m-%d %H:%M:%S')
+    time_obj2 = datetime.strptime(time_str2, '%Y-%m-%d %H:%M:%S.%f')
+
+    # 计算时间差
+    time_diff = time_obj2 - time_obj1
+
+    # 提取天数和小时数
+    days = time_diff.days
+    seconds = time_diff.seconds
+    hours = seconds // 3600  # 将秒数转换为小时
+    minutes = (seconds % 3600) // 60  # 剩余秒数转换为分钟
+    remaining_seconds = (seconds % 3600) % 60  # 剩余秒数
+    print(f"时间差: {days}天 {hours}小时 {minutes}分钟 {remaining_seconds}秒")
+    return [days,hours,minutes,remaining_seconds]
+    
+
+def get_dayun(birthday,sex):
+    # 生日要转成阳历
+    birthday = convert_nongli_to_yangli(birthday)
+    year = int(birthday.split("-")[0])
+    month = int(birthday.split("-")[1])
+    day = int(birthday.split("-")[2].split(" ")[0])
+    hour = int(birthday.split("-")[2].split(" ")[1].split(":")[0])
+    minutes = int(birthday.split("-")[2].split(" ")[1].split(":")[1])
+    second = int(birthday.split("-")[2].split(" ")[1].split(":")[2])
+
+    solar = Solar(year,month,day,hour,minutes,second)
+    lunar = solar.getLunar()
+    baZi = lunar.getEightChar()
+    # 八字
+    # print(baZi.getYear() + ' ' + baZi.getMonth() + ' ' + baZi.getDay() + ' ' + baZi.getTime())
+    if sex == "男":
+        yun = baZi.getYun(1)
+    else:
+        yun = baZi.getYun(0)
+
+    dayun_list = []
+    dayun_list.append('出生' + str(yun.getStartYear()) + '年' + str(yun.getStartMonth()) + '个月' + str(yun.getStartDay()) + '天后起运')
+    dayun_list.append('阳历' + yun.getStartSolar().toYmd() + '后起运')
+
+    # 大运
+    daYunArr = yun.getDaYun()
+    # 出生当年为1岁
+    for i in range(1, len(daYunArr)):
+        daYun = daYunArr[i]
+        dayun_list.append([str(daYun.getStartYear()) + '年 ', str(daYun.getStartAge()) + '岁 ', daYun.getGanZhi()])
+    # ['出生4年0个月20天后起运', '阳历1999-01-08后起运', ['1999年 ', '6岁 ', '乙亥'], ['2009年 ', '16岁 ', '甲戌'], ['2019年 ', '26岁 ', '癸酉'], ['2029年 ', '36岁 ', '壬申'], ['2039年 ', '46岁 ', '辛未'], ['2049年 ', '56岁 ', '庚午'], ['2059年 ', '66岁 ', '己巳'], ['2069年 ', '76岁 ', '戊辰'], ['2079年 ', '86岁 ', '丁卯']]
+    return dayun_list
+
+
+def get_shishen(bazi):
+    result = {
+        "比肩":0,
+        "比劫":0,
+        "偏印":0,
+        "正印":0,
+        "偏财":0,
+        "正财":0,
+        "七杀":0,
+        "正官":0,
+        "食神":0,
+        "伤官":0
+    }
+    shishen = get_mingzhu_shishen(bazi)
+    for i in range(len(bazi)):
+        for j in range(len(bazi[i])):
+            if i == 0 and j == 2:
+                continue
+            for item in list(shishen.keys()):
+                if bazi[i][j] in shishen[item]:
+                    result[item] += 1
+    return result
+
+def get_canggan(bazi):
+    canggan_ = {
+        "子":"癸",
+        "丑":"己癸辛",
+        "寅":"甲丙戊",
+        "卯":"乙",
+        "辰":"辰乙癸",
+        "巳":"丙庚戊",
+        "午":"丁己",
+        "未":"己丁乙",
+        "申":"庚壬戊",
+        "酉":"辛",
+        "戌":"戊辛丁",
+        "亥":"壬甲",
+    }
+
+    dizhicanggan = []
+    for item in bazi[1]:
+        dizhicanggan.append(canggan_[item])
+    return dizhicanggan
+
+def get_shensha(bazi,gender):
+    # gender格式为字符串“男”，“女”
+    # 神煞中的键是年支，值是月、日、时 的地支
+    nianzhudizhi_shensha = {
+        "孤辰":{"子":"寅","丑":"寅","寅":"巳","卯":"巳","辰":"巳","巳":"申","午":"申","未":"申","申":"亥","酉":"亥","戌":"亥","亥":"寅"},
+        "寡宿":{"子":"戌","丑":"戌","寅":"丑","卯":"丑","辰":"丑","巳":"辰","午":"辰","未":"辰","申":"未","酉":"未","戌":"未","亥":"戌"},
+        "大耗":{
+            "阳男阴女":{"子":"未","丑":"申","寅":"酉","卯":"戌","辰":"亥","巳":"子","午":"丑","未":"寅","申":"卯","酉":"辰","戌":"巳","亥":"午"},
+            "阴男阳女":{"子":"巳","丑":"午","寅":"未","卯":"申","辰":"酉","巳":"戌","午":"亥","未":"子","申":"丑","酉":"寅","戌":"卯","亥":"辰"}
+        }
+    }
+    # 对于天德贵人“地支”中的巳要从年日时的地支查，“天干”中的值从年月日时的天干中查
+    # 对于月德贵人键为月支，值为年月日时德天干
+    yuezhudizhi_shensha = {
+        "天德贵人":{
+            "地支":{"子":"巳","卯":"申","午":"亥","酉":"寅",},
+            "天干":{"丑":"庚","寅":"丁","辰":"壬","巳":"辛","未":"甲","申":"癸","戌":"丙","亥":"乙"}
+        },
+        "月德贵人":{"寅":"丙","午":"丙","戌":"丙","申":"壬","子":"壬","辰":"壬","亥":"甲","卯":"甲","未":"甲","巳":"庚","酉":"庚","丑":"庚"}
+    }
+    # 键为日干，值为年月日时的地支
+    rizhutiangan_shensha = {
+        "天乙贵人":{"甲":["丑","未"],"戊":["丑","未"],"庚":["丑","未"],"乙":["子","申"],"己":["子","申"],"丙":["亥","酉"],"丁":["亥","酉"],"辛":["寅","午"],"壬":["巳","卯"],"癸":["巳","卯"]},
+        "文昌贵人":{"甲":"巳","乙":"午","丙":"申","丁":"酉","戊":"申","己":"酉","庚":"亥","辛":"子","壬":"寅","癸":"丑"},
+        "羊刃":{"甲":"卯","丙":"午","戊":"午","庚":"酉","壬":"子"},
+        "红艳煞":{"甲":"午","乙":"午","丙":"寅","丁":"未","戊":"辰","己":"辰","庚":"戌","辛":"酉","壬":"子","癸":"申"},
+        "干禄":{"甲":"寅","乙":"卯","丙":"巳","丁":"午","戊":"巳","己":"午","庚":"申","辛":"酉","壬":"亥","癸":"子"}
+    }
+    # 键为日柱的地支，值为年月时的地支
+    rizhudizhi_shensha = {
+        "将星":{"子":"子","丑":"酉","寅":"午","卯":"卯","辰":"子","巳":"酉","午":"午","未":"卯","申":"子","酉":"酉","戌":"午","亥":"卯"},
+        "华盖":{"子":"辰","丑":"丑","寅":"戌","卯":"未","辰":"辰","巳":"丑","午":"戌","未":"未","申":"辰","酉":"丑","戌":"戌","亥":"未"},
+        "驿马":{"子":"寅","丑":"亥","寅":"申","卯":"巳","辰":"寅","巳":"亥","午":"申","未":"巳","申":"寅","酉":"亥","戌":"申","亥":"巳"},
+        "劫煞":{"子":"巳","丑":"寅","寅":"亥","卯":"申","辰":"巳","巳":"寅","午":"亥","未":"申","申":"巳","酉":"寅","戌":"亥","亥":"申"},
+        "亡神":{"子":"亥","丑":"申","寅":"巳","卯":"寅","辰":"亥","巳":"申","午":"巳","未":"寅","申":"亥","酉":"申","戌":"巳","亥":"寅"},
+        "桃花":{"子":"酉","丑":"午","寅":"卯","卯":"子","辰":"酉","巳":"午","午":"卯","未":"子","申":"酉","酉":"午","戌":"卯","亥":"子"}
+    }
+
+    wuxing = {
+        "甲":["阳","木"],
+        "乙":["阴","木"],
+        "丙":["阳","火"],
+        "丁":["阴","火"],
+        "戊":["阳","土"],
+        "己":["阴","土"],
+        "庚":["阳","金"],
+        "辛":["阴","金"],
+        "壬":["阳","水"],
+        "癸":["阴","水"],
+        "子":["阳","水"],
+        "丑":["阴","土"],
+        "寅":["阳","木"],
+        "卯":["阴","木"],
+        "辰":["阳","土"],
+        "巳":["阴","火"],
+        "午":["阳","火"],
+        "未":["阴","土"],
+        "申":["阳","金"],
+        "酉":["阴","金"],
+        "戌":["阳","土"],
+        "亥":["阴","水"],
+    }
+
+
+
+    result = []
+    # 计算是否有孤辰，寡宿，大耗
+    yuerishi_zhi = "".join(bazi[1][1:])
+    for item in list(nianzhudizhi_shensha.keys()):
+        if item == "大耗":
+            yinyang_nannv = wuxing[bazi[0][2]][0]+gender
+            for yynn in list(nianzhudizhi_shensha[item].keys()):
+                if yinyang_nannv in yynn:
+                    if nianzhudizhi_shensha[item][yynn][bazi[1][0]] in yuerishi_zhi:
+                        result.append(item)
+        else:
+            if nianzhudizhi_shensha[item][bazi[1][0]] in yuerishi_zhi:
+                result.append(item)
+
+    # 计算是否有天德贵人，月德贵人
+    nianrishi_zhi = "".join([bazi[1][0],bazi[1][2],bazi[1][3]])
+    nianyuerishi_gan = "".join(bazi[0])
+    for item in list(yuezhudizhi_shensha.keys()):
+        if item == "天德贵人":
+            for td in list(yuezhudizhi_shensha[item].keys()):
+                if td == "地支":
+                    if bazi[1][1] not in "子卯午酉":
+                        continue
+                    if yuezhudizhi_shensha[item][td][bazi[1][1]] in nianrishi_zhi:
+                        result.append(item)
+                else:
+                    if bazi[1][1] not in "丑寅辰巳未申戌亥":
+                        continue
+                    if yuezhudizhi_shensha[item][td][bazi[1][1]] in nianyuerishi_gan:
+                        result.append(item)
+        else:
+            if yuezhudizhi_shensha[item][bazi[1][1]] in nianyuerishi_gan:
+                result.append(item)
+
+    # 计算是否有天乙贵人，文昌贵人，羊刃，红艳煞，干禄
+    nianyuerishi_zhi = "".join(bazi[1])
+    for item in list(rizhutiangan_shensha.keys()):
+        if item == "天乙贵人":
+            for dz in rizhutiangan_shensha[item][bazi[0][2]]:
+                if dz in nianyuerishi_zhi:
+                    result.append(item)
+        elif item == "羊刃":
+            if bazi[0][2] in "甲丙戊庚壬":
+                if rizhutiangan_shensha[item][bazi[0][2]] in nianyuerishi_zhi:
+                    result.append(item)
+        else:
+            if rizhutiangan_shensha[item][bazi[0][2]] in nianyuerishi_zhi:
+                result.append(item)
+
+    # 计算是否有将星，华盖，驿马，劫煞，亡神，桃花
+    nianyueshi_zhi = "".join([bazi[1][0],bazi[1][1],bazi[1][3]])
+    for item in list(rizhudizhi_shensha.keys()):
+        if rizhudizhi_shensha[item][bazi[1][2]] in nianyueshi_zhi:
+            result.append(item)
+    
+    return result
+
+
+
+# bazi = [['甲', '丙', '己', '甲'], ['戌', '子', '卯', '戌']]
+# bazi = [["丙","己","丙","乙"],["子","亥","子","未"]]
+# bazi = [["丁","癸","癸","甲"],["卯","丑","未","寅"]]
+bazi = [['丁', '辛', '丙', '戊'], ['丑', '亥', '辰', '子']]
+print(get_shensha(bazi,"女"))
