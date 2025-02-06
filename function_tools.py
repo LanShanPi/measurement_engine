@@ -73,12 +73,20 @@ def get_changsheng(bazi=None, dayun_data=None ):
 
     # 计算长生状态
     # result存储的长生状态顺序为[八字年，八字月，八字日，八字时，大运]
-    result = []
-    result.append(get_longsheng_state(day_gan, bazi_year_zhi)),
-    result.append(get_longsheng_state(day_gan, bazi_month_zhi))
-    result.append(get_longsheng_state(day_gan, bazi_day_zhi))
-    result.append(get_longsheng_state(day_gan, bazi_hour_zhi))
-    result.append(dayun_changsheng)
+
+    # result = []
+    # result.append(get_longsheng_state(day_gan, bazi_year_zhi)),
+    # result.append(get_longsheng_state(day_gan, bazi_month_zhi))
+    # result.append(get_longsheng_state(day_gan, bazi_day_zhi))
+    # result.append(get_longsheng_state(day_gan, bazi_hour_zhi))
+    # result.append(dayun_changsheng)
+
+    result = {}
+    result["年柱十二长生"] = get_longsheng_state(day_gan, bazi_year_zhi)
+    result["月柱十二长生"] = get_longsheng_state(day_gan, bazi_month_zhi)
+    result["日柱十二长生"] = get_longsheng_state(day_gan, bazi_day_zhi)
+    result["时柱十二长生"] = get_longsheng_state(day_gan, bazi_hour_zhi)
+    result["大运年十二长生"] = dayun_changsheng
     return result
 
 
@@ -604,5 +612,6 @@ def get_shensha(bazi,gender):
 # bazi = [['甲', '丙', '己', '甲'], ['戌', '子', '卯', '戌']]
 # bazi = [["丙","己","丙","乙"],["子","亥","子","未"]]
 # bazi = [["丁","癸","癸","甲"],["卯","丑","未","寅"]]
-bazi = [['丁', '辛', '丙', '戊'], ['丑', '亥', '辰', '子']]
-print(get_shensha(bazi,"女"))
+
+# bazi = [['丁', '辛', '丙', '戊'], ['丑', '亥', '辰', '子']]
+# print(get_shensha(bazi,"女"))
