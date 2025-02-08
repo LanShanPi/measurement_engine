@@ -373,7 +373,7 @@ def get_bazi(input_time,mark=True):
         # 转阳历
         input_time = convert_nongli_to_yangli(input_time)
     # print(input_time)
-    # 需要把日期转成阳历进行计算
+    # 需要把日期转成阳历再进行计算
     date = cnlunar.Lunar(datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S"), godType='8char')  # 常规算法
     nianzhu = date.year8Char
     yuezhu = date.month8Char
@@ -607,7 +607,22 @@ def get_shensha(bazi,gender):
     
     return result
 
-
+def get_age(birthdate_str):
+    """
+    根据出生日期计算周岁
+    :param birthdate_str: str, 格式 "YYYY-MM-DD HH:MM:SS"
+    :return: int, 计算出的年龄
+    """
+    # 解析出生日期
+    birthdate = datetime.strptime(birthdate_str, "%Y-%m-%d %H:%M:%S").date()
+    
+    # 获取当前日期
+    today = datetime.today().date()
+    
+    # 计算周岁
+    age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
+    
+    return age
 
 # bazi = [['甲', '丙', '己', '甲'], ['戌', '子', '卯', '戌']]
 # bazi = [["丙","己","丙","乙"],["子","亥","子","未"]]

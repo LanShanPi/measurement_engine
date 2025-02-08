@@ -1,14 +1,21 @@
 from qiangruo import wuxingliliang,get_qiangruo
 from guiqi import guiqi_level
 from mingge import get_mingge
-from function_tools import get_bazi,get_dayun,get_changsheng,get_shensha
-
+from function_tools import get_bazi,get_dayun,get_changsheng,get_shensha,get_canggan,get_age,get_shishen
+import pytz
+from datetime import datetime
 
 
 
 def main(input_time,sex):
     bazi = get_bazi(input_time)
     print("八字：",bazi)
+
+    canggan = get_canggan(bazi)
+    print("地支藏干：",canggan)
+
+    shishen = get_shishen(bazi)
+    print("十神：",shishen)
 
     # 计算五行占比
     bazi_sfzk,wuxing_scale,wuxing_score = wuxingliliang(bazi)
@@ -39,10 +46,20 @@ def main(input_time,sex):
     mingge = get_mingge(bazi)
     print("命格：",mingge)
 
+    # 获取当前时间八字
+    beijing_tz = pytz.timezone("Asia/Shanghai")
+    beijing_time = datetime.now(beijing_tz)
+    now_bazi = get_bazi(beijing_time.strftime("%Y-%m-%d %H:%M:%S"),mark=False)
+    print("当前时间八字：",now_bazi)
+
+    # 获取年纪
+    age = get_age(input_time)
+    print("当前命主年纪：",age)
+
 if __name__ == "__main__":
     # bazi = [["丙","癸","丙","戊"],["子","巳","午","戌"]]
     # 农历生日
     # input_time = "1997-10-10 23:30:00"
-    # input_time = "1994-11-17 19:30:00"
-    input_time = "2022-10-12 08:00:00"
+    input_time = "1994-11-17 19:30:00"
+    # input_time = "2022-10-12 08:00:00"
     main(input_time,"男")
