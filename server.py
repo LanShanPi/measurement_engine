@@ -11,6 +11,8 @@ import dashscope
 import pytz
 from datetime import datetime
 from prompts import all_prompt
+from file_process import write_to_markdown
+
 
 app = FastAPI()
 
@@ -19,24 +21,47 @@ class BaziRequest(BaseModel):
     input_time: str  # 时间格式 YYYY-MM-DD HH:MM:SS
     sex: str  # 性别，男或女
 
-def get_ai_response(prompt):
-    messages = [
-        {'role': 'user', 'content': prompt}]
-    responses = dashscope.Generation.call("deepseek-r1", #调用的模型接口
-                                messages=messages,
-                                result_format='message',  # set the result to be "message"  format.
-                                stream=True, # 是否开启流式输出，不开启设置False
-                                incremental_output=True  # 是否开启流式输出，不开启设置False
-                                )
-    for response in responses:
-        if response.status_code == HTTPStatus.OK:
-            return response.output.choices[0]['message']['content']
-        else:
-            return 'Request id: %s, Status code: %s, error code: %s, error message: %s' % (
-                response.request_id, response.status_code,
-                response.code, response.message
-            )
 
+def get_ai_response(prompt):
+    response = dashscope.Generation.call(
+        "deepseek-r1",
+        messages=[{'role': 'user', 'content': prompt}],
+        result_format='message',  # 设定返回格式
+        stream=False,  # 关闭流式输出
+        incremental_output=False  # 关闭增量输出
+    )
+
+    if response.status_code == HTTPStatus.OK:
+        response_text = response.output.choices[0]['message']['content']
+        write_to_markdown(content=response_text)
+        return response_text
+    else:
+        return 'Request id: %s, Status code: %s, error code: %s, error message: %s' % (
+            response.request_id, response.status_code,
+            response.code, response.message
+        )
+
+def get_ai_response_stream(prompt):
+    response_generator = dashscope.Generation.call(
+        "deepseek-r1",
+        messages=[{'role': 'user', 'content': prompt}],
+        result_format='message',
+        stream=True,  # 开启流式输出
+        incremental_output=True  # 允许增量输出
+    )
+
+    # 由于 stream=True，返回的是生成器，无法直接获取 status_code
+    response_text = ""
+
+    try:
+        for message in response_generator:  # 遍历流式返回的数据
+            if hasattr(message, "output") and message.output.choices:
+                response_text += message.output.choices[0]['message']['content']
+    except Exception as e:
+        return f"Error during stream processing: {str(e)}"
+    write_to_markdown(content=response_text)
+
+    return response_text if response_text else "未能获取有效响应"
 
 @app.post("/calculate")
 def calculate(request: BaziRequest):
@@ -54,7 +79,7 @@ def calculate(request: BaziRequest):
     beijing_time = datetime.now(beijing_tz)
     now_bazi = get_bazi(beijing_time.strftime("%Y-%m-%d %H:%M:%S"),mark=False)
     age = get_age(request.input_time)
-    all_prompt = all_prompt.prompt.format(
+    prompt = all_prompt.format(
                     bazi=bazi,
                     wuxing_scale=wuxing_scale,
                     wuxing_score=wuxing_score,
@@ -67,9 +92,9 @@ def calculate(request: BaziRequest):
                     canggan=canggan,
                     shishen=shishen,
                     age=age,
-                    sex=request.sex
+                    sex=request.sex,
                 )
-    response = get_ai_response(all_prompt)
+    response = get_ai_response_stream(prompt)
     return response
 
     # return {
