@@ -21,6 +21,12 @@ class BaziRequest(BaseModel):
     input_time: str  # 时间格式 YYYY-MM-DD HH:MM:SS
     sex: str  # 性别，男或女
 
+# 新增一个请求数据模型，用于接收用户输入的八字时间、性别以及提问内容
+class AskRequest(BaseModel):
+    input_time: str  # 时间格式，例如 "YYYY-MM-DD HH:MM:SS"
+    sex: str         # 性别，例如 "男" 或 "女"
+    question: str    # 用户提问的问题
+
 
 def get_ai_response(prompt):
     response = dashscope.Generation.call(
@@ -62,6 +68,53 @@ def get_ai_response_stream(prompt):
     write_to_markdown(content=response_text)
 
     return response_text if response_text else "未能获取有效响应"
+
+
+@app.post("/ask")
+def ask_bazi_question(request: AskRequest):
+    """
+    根据用户的八字信息以及用户的提问内容，生成一个 prompt 请求大模型进行推算回复
+    """
+    # 1. 根据用户的出生时间和性别计算八字及相关命理信息
+    bazi = get_bazi(request.input_time)
+    bazi_sfzk, wuxing_scale, wuxing_score = wuxingliliang(bazi)
+    qiangruo = get_qiangruo(bazi)
+    shensha = get_shensha(bazi, request.sex)
+    dayun_data = get_dayun(request.input_time, request.sex)
+    changsheng = get_changsheng(bazi, dayun_data)
+    guiqi_ = guiqi_level(bazi)
+    mingge = get_mingge(bazi)
+    canggan = get_canggan(bazi)
+    shishen = get_shishen(bazi)
+    age = get_age(request.input_time)
+
+    # 2. 组合 prompt：先输出八字及命理信息，再附上用户的问题，
+    #    让大模型基于这些数据进行详细推算和回答
+    prompt = (
+        f"【用户八字信息分析】\n"
+        f"八字：{bazi}\n"
+        f"五行占比：{wuxing_scale}\n"
+        f"五行得分：{wuxing_score}\n"
+        f"强弱：{qiangruo}\n"
+        f"神煞：{shensha}\n"
+        f"大运年：{dayun_data}\n"
+        f"长生：{changsheng}\n"
+        f"贵气程度：{guiqi_}\n"
+        f"命格：{mingge}\n"
+        f"地支藏干：{canggan}\n"
+        f"十神：{shishen}\n"
+        f"年龄：{age}\n\n"
+        f"【用户提问】\n"
+        f"{request.question}\n\n"
+        f"请基于以上八字及命理数据，详细推算并给出专业解答。"
+    )
+
+    # 3. 调用大模型的接口（采用流式响应方式）获取回复
+    ai_response = get_ai_response_stream(prompt)
+
+    # 返回一个 JSON 对象，其中包含大模型的回答
+    return {"answer": ai_response}
+
 
 @app.post("/calculate")
 def calculate(request: BaziRequest):
