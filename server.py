@@ -10,7 +10,7 @@ from http import HTTPStatus
 import dashscope
 import pytz
 from datetime import datetime
-from prompts import all_prompt
+from prompts import all_prompt,question_prompt
 from file_process import write_to_markdown
 
 
@@ -26,6 +26,7 @@ class AskRequest(BaseModel):
     input_time: str  # 时间格式，例如 "YYYY-MM-DD HH:MM:SS"
     sex: str         # 性别，例如 "男" 或 "女"
     question: str    # 用户提问的问题
+    user_id:str      # 用户id
 
 
 def get_ai_response(prompt):
@@ -76,6 +77,7 @@ def ask_bazi_question(request: AskRequest):
     根据用户的八字信息以及用户的提问内容，生成一个 prompt 请求大模型进行推算回复
     """
     # 1. 根据用户的出生时间和性别计算八字及相关命理信息
+    user_id= request.user_id
     bazi = get_bazi(request.input_time)
     bazi_sfzk, wuxing_scale, wuxing_score = wuxingliliang(bazi)
     qiangruo = get_qiangruo(bazi)
@@ -87,27 +89,30 @@ def ask_bazi_question(request: AskRequest):
     canggan = get_canggan(bazi)
     shishen = get_shishen(bazi)
     age = get_age(request.input_time)
+    beijing_tz = pytz.timezone("Asia/Shanghai")
+    beijing_time = datetime.now(beijing_tz)
+    now_bazi = get_bazi(beijing_time.strftime("%Y-%m-%d %H:%M:%S"),mark=False)
 
     # 2. 组合 prompt：先输出八字及命理信息，再附上用户的问题，
     #    让大模型基于这些数据进行详细推算和回答
-    prompt = (
-        f"【用户八字信息分析】\n"
-        f"八字：{bazi}\n"
-        f"五行占比：{wuxing_scale}\n"
-        f"五行得分：{wuxing_score}\n"
-        f"强弱：{qiangruo}\n"
-        f"神煞：{shensha}\n"
-        f"大运年：{dayun_data}\n"
-        f"长生：{changsheng}\n"
-        f"贵气程度：{guiqi_}\n"
-        f"命格：{mingge}\n"
-        f"地支藏干：{canggan}\n"
-        f"十神：{shishen}\n"
-        f"年龄：{age}\n\n"
-        f"【用户提问】\n"
-        f"{request.question}\n\n"
-        f"请基于以上八字及命理数据，详细推算并给出专业解答。"
-    )
+    prompt = question_prompt.format(
+                    bazi=bazi,
+                    wuxing_scale=wuxing_scale,
+                    wuxing_score=wuxing_score,
+                    qiangruo=qiangruo,
+                    shensha=shensha,
+                    dayun_data=dayun_data,
+                    changsheng=changsheng,
+                    guiqi_=guiqi_,
+                    mingge=mingge,
+                    canggan=canggan,
+                    shishen=shishen,
+                    age=age,
+                    sex=request.sex,
+                    question=request.question,
+                    current_time=beijing_time.strftime("%Y-%m-%d %H:%M:%S"),
+                    current_hour_pillar=now_bazi
+                )
 
     # 3. 调用大模型的接口（采用流式响应方式）获取回复
     ai_response = get_ai_response_stream(prompt)
