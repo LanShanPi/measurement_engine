@@ -124,7 +124,7 @@ def get_ai_response_stream(prompt):
     except Exception as e:
         logger.error(f"流式响应处理出错：{str(e)}")
         return f"流式响应处理出错：{str(e)}"
-    write_to_markdown(content=response_text)
+    # write_to_markdown(content=response_text)
     return response_text if response_text else "未能获取有效响应"
 
 async def async_get_ai_response_stream(prompt: str):

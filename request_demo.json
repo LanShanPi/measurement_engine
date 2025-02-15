@@ -1,8 +1,8 @@
 # 计算一生命理
-curl -X POST "http://127.0.0.1:8001/calculate" -H "Content-Type: application/json" -d '{"input_time": "1994-11-17 19:30:00", "sex": "男"}'
+curl -X POST "http://117.147.213.226:8001/calculate" -H "Content-Type: application/json" -d '{"input_time": "1994-11-17 19:30:00", "sex": "男"}'
 
 # 本地测试
-curl -X POST "http://127.0.0.1:8001/ask_load" -H "Content-Type: application/json" -d '{"input_time": "1995-12-06 16:30:00", "sex": "男","question": "帮我算一下这辈子的财运，婚姻，事业。"}'
+curl -X POST "http://117.147.213.226:8001/ask_load" -H "Content-Type: application/json" -d '{"input_time": "1995-12-06 16:30:00", "sex": "男","question": "帮我算一下这辈子的财运，婚姻，事业。"}'
 
 # 线上服务
-curl -X POST "http://127.0.0.1:8001/ask" -H "Content-Type: application/json" -d '{"question": "帮我算一下这辈子的财运，婚姻，事业。","user_id": "000001"}'
+curl -X POST "http://117.147.213.226:8001/ask" -H "Content-Type: application/json" -d '{"question": "帮我看看我未来的媳妇漂亮吗","user_id": "000005"}'
