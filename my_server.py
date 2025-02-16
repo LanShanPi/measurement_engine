@@ -291,13 +291,15 @@ async def ask_bazi_question(request: AskRequest):
     """
     logger.info(f"接收到 /ask 请求，用户ID: {request.user_id}，问题: {request.question}")
     user_id = request.user_id
-    # 查询用户出生信息
+    # 首先查询用户出生信息
     user_inf = await asyncio.to_thread(get_user_birthdate, user_id)
+    # 如果查不到（此时用户的话里可能已有出生年月日时，也可能没有）
     if user_inf == "None":
         logger.info(f"用户({user_id})出生信息未查询到，调用 ask_birthdate。")
         response = await asyncio.to_thread(ask_birthdate, request.question)
+        # 如果用户说的话中有出生信息，此时大模型的回复会有体现，直接提取出生信息和回答，并将数据插入数据库
         if "&&" in response:
-            # 用户提供了正确格式的信息
+            # 用户提供了正确格式的信息(下面处理response的格式的原因跟prompt有关)
             user_birthdate = response.split("&&")[0]
             answer = response.split("&&")[1]
             birthdate_part = user_birthdate.split("#")[0]
@@ -306,11 +308,13 @@ async def ask_bazi_question(request: AskRequest):
             logger.info(f"用户({user_id})的出生信息已保存，返回回答。")
             return {"answer": answer}
         else:
+            # 如果用户说的话中没有出生信息，直接返回提示。
             logger.info(f"用户({user_id})未提供有效的出生信息，返回提示。")
             return {"answer": response}
     else:
+        # 如果查询到了用户的出生信息则会直接回复
         try:
-            # 从数据库中取出的出生信息格式： [id, birthdate, sex, ...]
+            # 从数据库中取出的出生信息格式： [id, birthdate, sex, time]
             birthdate = user_inf[1].replace("T", " ")
             sex = user_inf[2]
             logger.debug(f"用户({user_id})查询到的出生信息：birthdate={birthdate}, sex={sex}")
