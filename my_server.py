@@ -48,6 +48,10 @@ class BaziRequest(BaseModel):
     input_time: str  # 格式：YYYY-MM-DD HH:MM:SS
     sex: str         # 性别，例如：男 或 女
 
+class GetPromptRequest(BaseModel):
+    question: str    # 用户提问的问题
+    user_id: str     # 用户ID
+
 class AskRequest(BaseModel):
     question: str    # 用户提问的问题
     user_id: str     # 用户ID
@@ -235,6 +239,7 @@ def build_question_prompt(birthdate: str, sex: str, question: str) -> str:
     logger.info(f"生成的 question_prompt 完成。")
     return prompt
 
+
 def build_calculate_prompt(birthdate: str, sex: str) -> str:
     """
     根据出生时间和性别生成用于计算八字等命理信息的 prompt，
@@ -280,6 +285,24 @@ async def process_question(birthdate: str, sex: str, question: str) -> str:
     ai_response = await async_get_ai_response_stream(prompt)
     logger.debug("process_question 返回结果。")
     return ai_response
+
+
+@app.post("/get_prompt")
+async def get_prompt(request: GetPromptRequest):
+    """
+    获取大模型回答的 prompt，用于本地测试。
+    """
+    logger.info(f"接收到 /get_prompt 请求，用户ID: {request.user_id}，问题: {request.question}")
+    user_id = request.user_id
+    question = request.question
+    user_inf = await asyncio.to_thread(get_user_birthdate, user_id)
+    birthdate = user_inf[1].replace("T", " ")
+    sex = user_inf[2]
+    prompt = build_question_prompt(birthdate=birthdate, sex=sex, question=question)
+    logger.info("/get_prompt 请求处理完成。获取到的 prompt")
+    return {"answer": prompt}
+    
+
 
 # ======================= API 路由 ======================
 @app.post("/ask")

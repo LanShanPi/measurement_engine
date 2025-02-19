@@ -5,4 +5,7 @@ curl -X POST "http://117.147.213.226:8001/calculate" -H "Content-Type: applicati
 curl -X POST "http://117.147.213.226:8001/ask_load" -H "Content-Type: application/json" -d '{"input_time": "1995-12-06 16:30:00", "sex": "男","question": "帮我算一下这辈子的财运，婚姻，事业。"}'
 
 # 线上服务
-curl -X POST "http://117.147.213.226:8001/ask" -H "Content-Type: application/json" -d '{"question": "你好","user_id": "000007"}'
+curl -X POST "http://117.147.213.226:8001/ask" -H "Content-Type: application/json" -d '{"question": "我明天能发财吗","user_id": "000002"}'
+
+# 获取prompt
+curl -X POST "http://117.147.213.226:8001/get_prompt" -H "Content-Type: application/json" -d '{"question": "我明天能发财吗","user_id": "000002"}'
