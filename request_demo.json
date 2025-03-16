@@ -2,10 +2,11 @@
 curl -X POST "http://117.147.213.226:8001/calculate" -H "Content-Type: application/json" -d '{"input_time": "1994-11-17 19:30:00", "sex": "男"}'
 
 # 本地测试
-curl -X POST "http://117.147.213.226:8001/ask_load" -H "Content-Type: application/json" -d '{"input_time": "1996-02-06 12:30:00", "sex": "男","question": "帮我看看我2024年都大概经历了什么"}'
+curl -X POST "http://localhost:8010/ask_load" -H "Content-Type: application/json" -d '{"input_time": "1993-01-16 22:30:00", "sex": "女","question": "那你帮我算一下我这辈子的运势"}'
+curl -X POST "http://117.147.213.226:8010/ask_load" -H "Content-Type: application/json" -d '{"input_time": "1994-11-17 19:30:00", "sex": "男","question": "帮我看一下未来的运势"}'
 
 # 线上服务
-curl -X POST "http://117.147.213.226:8001/ask" -H "Content-Type: application/json" -d '{"question": "我明天能发财吗","user_id": "000002"}'
+curl -X POST "http://localhost:8010/ask" -H "Content-Type: application/json" -d '{"question": "我明天能发财吗","user_id": "002"}'
 
 # 获取prompt
 curl -X POST "http://117.147.213.226:8001/get_prompt" -H "Content-Type: application/json" -d '{"question": "我明天能发财吗","user_id": "000002"}'

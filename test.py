@@ -1,32 +1,72 @@
-import requests
-import json
-def update_user_birth_info(user_id, birthdate=None, sex=None):
-    """
-    更新用户的出生日期和/或性别信息
-    如果 birthdate 和 sex 均为 None，则不做任何更新
-    """
-    logger.debug(f"进入 update_user_birth_info: user_id={user_id}, birthdate={birthdate}, sex={sex}")
-    
-    # 构造更新子句
-    clauses = []
-    if birthdate is not None:
-        clauses.append(f'birthdate = "{birthdate}"')
-    if sex is not None:
-        clauses.append(f'sex = "{sex}"')
+# # 安装必要库：pip install sxtwl
+# from datetime import datetime, timedelta
+# import sxtwl
+# from pytz import timezone
 
-    set_clause = ", ".join(clauses)
-    url = "http://117.147.213.226:8000/update_data/"
-    data = {
-        "db_name": "mingli",
-        "table_name": "birthdate",
-        "set_clause": set_clause,
-        "condition": f'id={user_id}'
-    }
+# class JieQiCalculator:
+#     def __init__(self, lat=31.23, lon=121.47, tz='Asia/Shanghai'):
+#         """初始化地理坐标与时区
+#         Args:
+#             lat: 纬度（默认上海） 
+#             lon: 经度（默认上海）
+#             tz: 时区（默认东八区）
+#         """
+#         self.tz = timezone(tz)
+#         self.lunar = sxtwl.Lunar()
+        
+#     def get_jieqi_range(self, year):
+#         """获取指定年份的节气时间表（精确到秒）"""
+#         jq = self.lunar.getJieQiByYear(year)
+#         return {sxtwl.JQmc[jd.JD]: self._jd_to_local(jd) for jd in jq}
     
-    try:
-        response = requests.put(url, headers={"Content-Type": "application/json"}, data=json.dumps(data))
-        logger.info(f"更新用户({user_id})信息成功，响应码：{response.status_code}")
-    except Exception as e:
-        logger.error(f"更新用户({user_id})信息出错：{str(e)}")
+#     def _jd_to_local(self, jd_obj):
+#         """儒略日转本地时间"""
+#         utc_time = datetime.utcfromtimestamp(jd_obj.getUTC().timestamp())
+#         return utc_time.astimezone(self.tz)
+    
+#     def get_ganzhi(self, dt):
+#         """获取指定时间的四柱信息"""
+#         day = self.lunar.getDayBySolar(dt.year, dt.month, dt.day)
+#         return {
+#             '年柱': self.lunar.getYearGZ(day.year),
+#             '月柱': self.lunar.getMonthGZ(day.month, day.day),
+#             '日柱': self.lunar.getDayGZ(day.year, day.month, day.day),
+#             '时柱': self.lunar.getHourGZ(day.hour, day.day)
+#         }
+    
+#     def validate_birth_time(self, birth_time):
+#         """验证出生时间是否在节气交接关键期"""
+#         jq_list = self.get_jieqi_range(birth_time.year)
+#         for name, time in jq_list.items():
+#             if abs((birth_time - time).total_seconds()) < 7200:  # 2小时内
+#                 return f"临界节气：{name} {time.strftime('%Y-%m-%d %H:%M:%S')}"
+#         return "无临界节气影响"
 
-update_user_birth_info(user_id="000001", birthdate="1800-12-03T12:00:00",sex="男")
+# # 使用示例
+# if __name__ == '__main__':
+#     calculator = JieQiCalculator()
+    
+#     # 获取2024年节气表
+#     jieqi_2024 = calculator.get_jieqi_range(2024)
+#     for name, time in jieqi_2024.items():
+#         print(f"{name}: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    
+#     # 验证出生时间
+#     birth_time = datetime(2024, 2, 4, 10, 30).astimezone(timezone('Asia/Shanghai'))
+#     print(calculator.validate_birth_time(birth_time))
+    
+#     # 获取四柱
+#     print(calculator.get_ganzhi(datetime(2024, 5, 5, 14, 30)))
+
+
+from lunar_python import LunarYear, Solar
+
+# 获取2020年的节气对应的儒略日
+lunar_year = LunarYear.fromYear(2020)
+jie_qi_julian_days = lunar_year.getJieQiJulianDays()
+
+# 遍历所有节气
+for julian_day in jie_qi_julian_days:
+    solar = Solar.fromJulianDay(julian_day)  # 转换为阳历
+    lunar = solar.getLunar()  # 获取对应的农历
+    print(f"{julian_day} = {solar.toYmdHms()} {lunar.getJieQi()}")

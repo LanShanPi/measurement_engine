@@ -11,7 +11,7 @@ from mingge import get_mingge
 from function_tools import get_bazi, get_dayun, get_changsheng, get_shensha, get_age, get_canggan, get_shishen
 import pytz
 from datetime import datetime
-from prompts import all_prompt, question_prompt, ask_birthdate_prompt
+from prompts import question_prompt, ask_birthdate_prompt, all_prompt
 from file_process import write_to_markdown
 import requests
 import json
@@ -384,4 +384,4 @@ async def calculate(request: BaziRequest):
 if __name__ == "__main__":
     dashscope.api_key = qianwen_key
     logger.info("启动 FastAPI 应用，监听端口 8001...")
-    uvicorn.run(app, host="0.0.0.0", port=8001)
+    uvicorn.run(app, host="0.0.0.0", port=8010)
