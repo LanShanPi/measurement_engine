@@ -35,9 +35,6 @@ class SolarTerm:
             225, 240, 255, 270, 285, 300
         ]
         
-        # C语言风格常量
-        self.SECOND_PER_DAY = 86400.0  # 每天秒数
-        self.EPOCH_OFFSET_AMTHOR = 719949  # 1970-01-01到0000-01-01的天数
 
     def get_jieqi_date(self, year, term_name):
         """获取指定年份中某节气的日期"""
@@ -207,7 +204,7 @@ class ProfessionalHehun:
         
     def _init_rules(self):
         """动态规则初始化（含案例库训练）"""
-        # 基础规则（网页1/2/3）
+        # 基础规则
         self.rules = {
             '生肖': {'六合':1.8, '三合':1.6, '六冲':-2.0, '六害':-1.5, '相刑':-2.5},
             '天干': {'五合':2.0, '相生':1.5, '相克':-1.2},
@@ -282,7 +279,7 @@ class ProfessionalHehun:
 
     def _generate_3d_mingpan(self, birth):
         """三维命盘生成（节气校正+藏干权重）"""
-        # 定义藏干能量模型（移到try块外部，避免未定义错误）
+        # 定义藏干能量模型
         hidden_elements = {
             '寅': [('甲',0.6), ('丙',0.3), ('戊',0.1)],
             '午': [('丁',0.7), ('己',0.3)],
@@ -382,7 +379,7 @@ class ProfessionalHehun:
             'suggestions': []
         }
         
-        # 维度1：生肖五维分析（网页1）
+        # 维度1：生肖五维分析
         sx_res = self._analyze_shengxiao()
         report['score'] += sx_res['score']
         report['details'].append(sx_res['detail'])
@@ -495,34 +492,40 @@ class ProfessionalHehun:
         return report
 
     def _analyze_shengxiao(self):
-        """生肖五维分析（网页1的六合/三合/相冲规则）"""
+        """生肖五维分析"""
         sx_m = self.male['年柱'][1]
         sx_f = self.female['年柱'][1]
         result = {'score':0, 'detail':'', 'warning':''}
         
-        # 六合检测（子丑等）
+        # 六合检测
         liuhe_pairs = [('子','丑'), ('寅','亥'), ('卯','戌'), 
                       ('辰','酉'), ('巳','申'), ('午','未')]
         if (sx_m, sx_f) in liuhe_pairs or (sx_f, sx_m) in liuhe_pairs:
             result['score'] += self.rules['生肖']['六合']
             result['detail'] += f"生肖六合({sx_m}+{sx_f}) +{self.rules['生肖']['六合']}分 "
         
-        # 三合检测（网页1的申子辰等组合）
+        # 三合检测
         sanhe_groups = ['申子辰','寅午戌','巳酉丑','亥卯未']
         for group in sanhe_groups:
             if sx_m in group and sx_f in group:
                 result['score'] += self.rules['生肖']['三合']
                 result['detail'] += f"生肖三合({group}) +{self.rules['生肖']['三合']}分 "
         
-        # 相冲检测（网页1的六冲规则）
+        # 六冲检测
         xiangchong = [('子','午'), ('丑','未'), ('寅','申'), 
                      ('卯','酉'), ('辰','戌'), ('巳','亥')]
         if (sx_m, sx_f) in xiangchong or (sx_f, sx_m) in xiangchong:
             penalty = self.rules['生肖']['六冲']
             result['score'] += penalty
             result['detail'] += f"生肖相冲({sx_m}{sx_f}) {penalty}分 "
-            result['warning'] = "生肖相冲易导致矛盾，建议佩戴吉祥物化解[1](@ref)"
+            result['warning'] = "生肖相冲易导致矛盾，建议佩戴吉祥物化解"
         
+        # 六害检测
+
+        # 相刑检测
+
+        #
+
         # 案例库权重调整
         self.cursor.execute("SELECT weight FROM shengxiao_rules WHERE pair=?", (sx_m+sx_f,))
         if db_weight := self.cursor.fetchone():
