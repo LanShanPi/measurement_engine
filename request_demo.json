@@ -1,8 +1,8 @@
 # 计算一生命理
 curl -X POST "http://117.147.213.226:8001/calculate" -H "Content-Type: application/json" -d '{"input_time": "1994-11-17 19:30:00", "sex": "男"}'
 
-# 本地测试
-curl -X POST "http://localhost:8010/ask_load" -H "Content-Type: application/json" -d '{"input_time": "1993-01-16 22:30:00", "sex": "女","question": "那你帮我算一下我这辈子的运势"}'
+# 本地测试（my_server）curl -X POST "http://localhost:8010/ask_load" -H "Content-Type: application/json" -d '{"input_time": "1997-10-10 22:00:00", "sex": "女","question": "2024年底网络安全算法工程师被裁，接下来的职业规划怎么来比较好"}'
+
 curl -X POST "http://117.147.213.226:8010/ask_load" -H "Content-Type: application/json" -d '{"input_time": "1994-11-17 19:30:00", "sex": "男","question": "帮我看一下未来的运势"}'
 
 # 线上服务

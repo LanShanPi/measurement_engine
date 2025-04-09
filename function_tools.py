@@ -343,7 +343,7 @@ def get_zhengyin(bazi):
     return False
 
 def convert_yangli_to_nongli(input_time):
-    # 农历转阳历
+    # 阳历转农历
     dt_date = datetime.strptime(input_time, "%Y-%m-%d %H:%M:%S")
     date = str(lunar_date.from_datetime(dt_date)) # 农历2020年7月7日 , 从阳历日期转换成农历日期
     # 正则表达式提取年份、月份和日期
@@ -623,6 +623,35 @@ def get_age(birthdate_str):
     age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
     
     return age
+
+
+def get_current_time():
+    import pytz
+    beijing_tz = pytz.timezone("Asia/Shanghai")
+    beijing_time = datetime.now(beijing_tz)
+    # 阳历时间
+    time = str(beijing_time.strftime("%Y-%m-%d %H:%M:%S"))
+    yangli_year = time.split(" ")[0].split("-")[0]
+    yangli_month = time.split(" ")[0].split("-")[1]
+    yangli_day = time.split(" ")[0].split("-")[2]
+    yangli_hour = time.split(" ")[1].split(":")[0]
+    yangli_min = time.split(" ")[1].split(":")[1]
+    yangli_sec = time.split(" ")[1].split(":")[2]
+    # 农历时间
+    nongli = convert_yangli_to_nongli(time)
+    nongli_year = nongli.split(" ")[0].split("-")[0]
+    nongli_month = nongli.split(" ")[0].split("-")[1]
+    nongli_day = nongli.split(" ")[0].split("-")[2]
+    nongli_hour = time.split(" ")[1].split(":")[0]
+    nongli_min = time.split(" ")[1].split(":")[1]
+    nongli_sec = time.split(" ")[1].split(":")[2]
+    # 计算星期
+    result = datetime.now().isocalendar()
+
+    current_time = f"当前日期是：阳历{yangli_year}年{yangli_month}月{yangli_day}日，农历{nongli_year}年{nongli_month}月{nongli_day}日，本年第{result[1]}周的周{result[2]}，当前时间是（24小时制）：{yangli_hour}时{yangli_min}分{yangli_sec}秒"
+
+    return current_time
+# print(get_current_time())
 
 # bazi = [['甲', '丙', '己', '甲'], ['戌', '子', '卯', '戌']]
 # bazi = [["丙","己","丙","乙"],["子","亥","子","未"]]

@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from qiangruo import wuxingliliang, get_qiangruo
 from guiqi import guiqi_level
 from mingge import get_mingge
-from function_tools import get_bazi, get_dayun, get_changsheng, get_shensha, get_age, get_canggan, get_shishen
+from function_tools import get_current_time,get_bazi, get_dayun, get_changsheng, get_shensha, get_age, get_canggan, get_shishen
 import pytz
 from datetime import datetime
 from prompts import question_prompt, ask_birthdate_prompt, all_prompt
@@ -217,6 +217,7 @@ def build_question_prompt(birthdate: str, sex: str, question: str) -> str:
     age = get_age(birthdate)
     beijing_tz = pytz.timezone("Asia/Shanghai")
     beijing_time = datetime.now(beijing_tz)
+    current_time = get_current_time()
     now_bazi = get_bazi(beijing_time.strftime("%Y-%m-%d %H:%M:%S"), mark=False)
     prompt = question_prompt.format(
         bazi=bazi,
@@ -233,7 +234,7 @@ def build_question_prompt(birthdate: str, sex: str, question: str) -> str:
         age=age,
         sex=sex,
         question=question,
-        current_time=beijing_time.strftime("%Y-%m-%d %H:%M:%S"),
+        current_time=current_time,
         current_hour_pillar=now_bazi
     )
     logger.info(f"生成的 question_prompt 完成。")
