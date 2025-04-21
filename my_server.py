@@ -221,7 +221,7 @@ def build_question_prompt(birthdate: str, sex: str, question: str) -> str:
     now_bazi = get_bazi(beijing_time.strftime("%Y-%m-%d %H:%M:%S"), mark=False)
     prompt = question_prompt.format(
         birthdate=birthdate,
-        birthday_yangli=yangli_birthdate,
+        birthdate_yangli=yangli_birthdate,
         bazi=bazi,
         wuxing_scale=wuxing_scale,
         wuxing_score=wuxing_score,
