@@ -237,6 +237,8 @@ question_prompt = """
 
 另外下面的<命格>数据可能不准确，你需要仔细进行辨别。
 【用户八字信息】：
+- 农历生日：{birthday}
+- 公历生日：{birthday_yangli}
 - 八字：{bazi}
 - 五行占比：{wuxing_scale}
 - 五行得分：{wuxing_score}

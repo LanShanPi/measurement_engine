@@ -382,7 +382,8 @@ def get_bazi(input_time,mark=True):
     bazi = []
     bazi.append([nianzhu[0],yuezhu[0],rizhu[0],shizhu[0]])
     bazi.append([nianzhu[1],yuezhu[1],rizhu[1],shizhu[1]])
-    return bazi
+    # 返回八字和对应的阳历生日
+    return bazi,input_time
 
 def get_time_dif(time_str1,time_str2):######################
     print(time_str1,time_str2)

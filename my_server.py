@@ -204,7 +204,7 @@ def build_question_prompt(birthdate: str, sex: str, question: str) -> str:
     包含八字、五行、神煞等命理信息以及当前时间等。
     """
     logger.debug(f"生成 question_prompt，birthdate={birthdate}, sex={sex}, question={question}")
-    bazi = get_bazi(birthdate)
+    bazi,yangli_birthdate = get_bazi(birthdate)
     bazi_sfzk, wuxing_scale, wuxing_score = wuxingliliang(bazi)
     qiangruo = get_qiangruo(bazi)
     shensha = get_shensha(bazi, sex)
@@ -220,6 +220,8 @@ def build_question_prompt(birthdate: str, sex: str, question: str) -> str:
     current_time = get_current_time()
     now_bazi = get_bazi(beijing_time.strftime("%Y-%m-%d %H:%M:%S"), mark=False)
     prompt = question_prompt.format(
+        birthdate=birthdate,
+        birthday_yangli=yangli_birthdate,
         bazi=bazi,
         wuxing_scale=wuxing_scale,
         wuxing_score=wuxing_score,
